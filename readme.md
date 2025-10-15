@@ -34,6 +34,10 @@ Voici la liste complète des fonctionnalités prévues, classées par priorité 
 7. **Personnalisation (icônes, couleurs, catégories)**
    - Choix d’icône, emoji, couleur, catégorisation des habitudes, thèmes sombres/clairs
 
+8. **Backoffice**
+   - Gestion administratives globales de l'app
+
+
 ---
 
 ## ⚙️ Fonctionnalités principales
@@ -83,6 +87,10 @@ Ajout de fonctionnalités pour enrichir l’expérience utilisateur et la person
 4. **Export / sauvegarde**
    - Export des données au format CSV / JSON
    - Export visuel du calendrier (PNG ou PDF)
+
+5. **Backoffice**
+   - Gestion des utilisateurs
+
 
 ---
 
