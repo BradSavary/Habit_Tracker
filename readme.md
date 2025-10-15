@@ -30,7 +30,7 @@ Fonctionnalités essentielles pour une première version utilisable.
 
 3. **Validation quotidienne**
    - Cocher ou valider une habitude pour un jour donné
-   - Suivi automatique du streak (chaîne de jours réussis)
+   - Suivi automatique du streak (chaîne de jours réussis) et pourcentage d'accomplissement
 
 4. **Affichage des streaks**
    - Indicateur visuel du nombre de jours consécutifs réussis
@@ -76,22 +76,6 @@ Fonctionnalités pour améliorer l’engagement et l’analyse de la progression
    - Visualisation mensuelle / annuelle
    - Pourcentage de réussite par habitude
    - Moyenne de complétion globale
-
----
-
-### 🧱 Version 4 – Objectifs, Récompenses & Analyse globale
-Fonctionnalités avancées pour la motivation et l’analyse approfondie.
-
-1. **Objectifs chiffrés**
-   - Suivi progressif du pourcentage d’accomplissement
-
-2. **Badges / récompenses**
-   - Récompenses visuelles pour les longues séries ou objectifs atteints
-
-3. **Vue “Analyse” globale**
-   - Habitudes les plus réussies
-   - Celles nécessitant des efforts
-   - Graphique combiné de toutes les habitudes
 
 ---
 
