@@ -116,16 +116,7 @@ Fonctionnalités additionnelles pour enrichir l’application.
 
 ---
 
-## 🧩 Stack technique recommandée
-
-- **Framework :** Next.js
-- **UI :** TailwindCSS + Shadcn
-- **Graphiques :** Chart.js
-- **Déploiement :** Vercel
-
----
-
-## 🔄 Priorisation du développement
+## 🔄 Importance des features
 
 | Priorité | Fonctionnalité | Objectif |
 |-----------|----------------|-----------|
@@ -138,5 +129,26 @@ Fonctionnalités additionnelles pour enrichir l’application.
 | 7️⃣ | Personnalisation (icônes, couleurs) | Esthétique & confort |
 | 8️⃣ | Sauvegarde cloud / multi-appareil | Expérience fluide multi-support |
 | 9️⃣ | Objectifs, badges & gamification | Fidélisation long terme |
+
+---
+
+
+
+## 🎨 Inspiration visuelle
+
+### Streaks app
+Application mobile axée sur la simplicité et la motivation par les séries d’habitudes.
+
+![Streaks app 1](https://cdn.macstories.net/001/2017-07-26-08-49-17.jpeg)
+![Streaks app 2](https://crunchybagel.com/content/images/2019/09/pomodoro.png)
+
+---
+
+### Habitify app
+Application orientée productivité et suivi détaillé des habitudes.
+
+![Habitify app 1](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLMiuOugMcwfRwkOHLmrZh5P5P4zvlHaJYAsU64mh_F9f0w0yfqfZdmpdmUflB5hIRJ5M&usqp=CAU)
+![Habitify app 2](https://cdn.prod.website-files.com/5d3aa39f8474c472841a7dfc/6480a277275ec417eb65c134_Frame%20678.jpg)
+![Habitify app 3](https://www.betaphase.cafe/wp-content/uploads/2023/01/habitify-habit-tracker-app-e1673500577321-1024x680.jpg)
 
 ---
