@@ -6,11 +6,33 @@ L’objectif est d’offrir une expérience simple, motivante et personnalisable
 
 ---
 
-## 🚀 Objectifs principaux
-- Permettre à l’utilisateur de **créer et gérer ses habitudes** facilement.  
-- Offrir un **suivi visuel clair** (calendrier, statistiques, séries).  
-- Aider à **maintenir la motivation** grâce aux streaks, rappels et éléments visuels.  
-- Fournir une interface **intuitive et moderne**.
+
+---
+
+## 🏆 User Stories
+
+Voici la liste complète des fonctionnalités prévues, classées par priorité pour guider le développement :
+
+1. **Authentification & gestion utilisateur**
+   - Accès sécurisé aux données, inscription, connexion, déconnexion, gestion de session, protection des routes
+
+2. **Création / suppression / validation d’habitudes**
+   - Ajout, modification, suppression, validation quotidienne, gestion des fréquences et jours spécifiques
+
+3. **Dashboard (calendrier + liste du jour)**
+   - Vue centrale, affichage des habitudes du jour, calendrier interactif, actions rapides
+
+4. **Streaks & statistiques simples**
+   - Suivi des séries de jours réussis, indicateur visuel, statistiques globales simples
+
+5. **Notifications & rappels**
+   - Rappels configurables, notifications sur app et email, personnalisation des heures
+
+6. **Graphiques avancés & exports**
+   - Visualisation mensuelle/annuelle, export CSV/JSON, export visuel du calendrier
+
+7. **Personnalisation (icônes, couleurs, catégories)**
+   - Choix d’icône, emoji, couleur, catégorisation des habitudes, thèmes sombres/clairs
 
 ---
 
