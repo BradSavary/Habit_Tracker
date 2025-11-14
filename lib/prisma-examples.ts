@@ -115,7 +115,7 @@ export async function calculateStreak(habitId: string): Promise<number> {
   if (completions.length === 0) return 0
 
   let streak = 0
-  let currentDate = new Date()
+  const currentDate = new Date()
   currentDate.setHours(0, 0, 0, 0)
 
   for (const completion of completions) {

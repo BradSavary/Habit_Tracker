@@ -13,8 +13,7 @@ import {
   STATUS_COLORS, 
   getHabitColorClass,
   getStatusColorClass,
-  type HabitColorKey,
-  type StatusColorKey 
+  type HabitColorKey
 } from "@/lib/design-tokens";
 import { CheckCircle, AlertTriangle, XCircle, Info } from "lucide-react";
 
@@ -37,7 +36,7 @@ export function DesignTokensDemo() {
           <CardHeader>
             <CardTitle className="text-foreground-800">Background Tokens</CardTitle>
             <CardDescription className="text-foreground-400">
-              5 niveaux d'élévation et de profondeur
+              5 niveaux d&apos;élévation et de profondeur
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -82,9 +81,9 @@ export function DesignTokensDemo() {
         {/* Habit Colors */}
         <Card className="bg-background-300 border-background-500">
           <CardHeader>
-            <CardTitle className="text-foreground-800">Accent Colors - Catégories d'habitudes</CardTitle>
+            <CardTitle className="text-foreground-800">Accent Colors - Catégories d&apos;habitudes</CardTitle>
             <CardDescription className="text-foreground-400">
-              Couleurs vibrantes pour différencier les types d'habitudes
+              Couleurs vibrantes pour différencier les types d&apos;habitudes
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -171,7 +170,7 @@ export function DesignTokensDemo() {
                   </h3>
                 </div>
                 <p className="text-foreground-500 text-sm">
-                  Attention ! Votre streak est en danger. Complétez votre habitude aujourd'hui.
+                  Attention ! Votre streak est en danger. Complétez votre habitude aujourd&apos;hui.
                 </p>
                 <Button 
                   className={`mt-4 ${getStatusColorClass('warning', 'solid')} text-background-100`}
@@ -265,7 +264,7 @@ export function DesignTokensDemo() {
             🎨 Tous les tokens sont automatiquement adaptés au mode sombre/clair
           </p>
           <p className="text-foreground-300 text-sm mt-2">
-            Basé sur l'analyse de la direction artistique du dossier /inspiration
+            Basé sur l&apos;analyse de la direction artistique du dossier /inspiration
           </p>
         </div>
       </div>
