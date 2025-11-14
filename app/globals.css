@@ -64,115 +64,201 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.75rem;
   
-  /* Base tokens */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* ========================================
+     BASE TOKENS - Light Mode
+     ======================================== */
+  --background: oklch(0.98 0 0);
+  --foreground: oklch(0.15 0 0);
   
-  /* Background semantic tokens - Light mode */
-  --background-100: oklch(1 0 0);           /* Pure white - main bg */
-  --background-200: oklch(0.99 0 0);        /* Très léger gris - subtle bg */
-  --background-300: oklch(0.97 0 0);        /* Gris très clair - cards, sections */
-  --background-400: oklch(0.94 0 0);        /* Gris clair - hover states */
-  --background-500: oklch(0.90 0 0);        /* Gris moyen - borders, dividers */
+  /* ========================================
+     BACKGROUND SEMANTIC TOKENS - Light Mode
+     Hiérarchie d'élévation et de profondeur
+     ======================================== */
+  --background-100: oklch(0.98 0 0);        /* Main app background - blanc cassé */
+  --background-200: oklch(0.96 0 0);        /* Subtle background - conteneur principal */
+  --background-300: oklch(1 0 0);           /* Cards elevated - blanc pur pour cards */
+  --background-400: oklch(0.95 0 0);        /* Hover states - légère interaction */
+  --background-500: oklch(0.88 0 0);        /* Borders & dividers - séparateurs */
   
-  /* Foreground semantic tokens - Light mode */
-  --foreground-100: oklch(0.97 0 0);        /* Très clair - disabled text */
-  --foreground-200: oklch(0.80 0 0);        /* Clair - placeholder text */
-  --foreground-300: oklch(0.65 0 0);        /* Moyen clair - secondary text */
-  --foreground-400: oklch(0.50 0 0);        /* Moyen - tertiary text */
-  --foreground-500: oklch(0.35 0 0);        /* Moyen foncé - body text */
-  --foreground-600: oklch(0.25 0 0);        /* Foncé - headings */
-  --foreground-700: oklch(0.20 0 0);        /* Très foncé - emphasis */
-  --foreground-800: oklch(0.15 0 0);        /* Presque noir - primary text */
-  --foreground-900: oklch(0.10 0 0);        /* Noir - high contrast */
+  /* ========================================
+     FOREGROUND SEMANTIC TOKENS - Light Mode
+     Hiérarchie typographique et états
+     ======================================== */
+  --foreground-100: oklch(0.85 0 0);        /* Disabled text - désactivé */
+  --foreground-200: oklch(0.70 0 0);        /* Placeholder text - champs vides */
+  --foreground-300: oklch(0.55 0 0);        /* Secondary text - descriptions, labels */
+  --foreground-400: oklch(0.45 0 0);        /* Tertiary text - métadonnées */
+  --foreground-500: oklch(0.30 0 0);        /* Body text - texte standard */
+  --foreground-600: oklch(0.20 0 0);        /* Subheadings - sous-titres */
+  --foreground-700: oklch(0.15 0 0);        /* Headings - titres principaux */
+  --foreground-800: oklch(0.10 0 0);        /* Primary text - texte important */
+  --foreground-900: oklch(0.05 0 0);        /* High contrast - maximum contraste */
   
-  /* Existing shadcn tokens */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  /* ========================================
+     ACCENT COLORS - Habit Categories
+     Couleurs vibrantes pour les habitudes
+     ======================================== */
+  --accent-purple: oklch(0.60 0.20 290);    /* Violet - Santé/Bien-être */
+  --accent-purple-light: oklch(0.90 0.08 290);
+  --accent-blue: oklch(0.55 0.18 240);      /* Bleu - Productivité */
+  --accent-blue-light: oklch(0.88 0.07 240);
+  --accent-green: oklch(0.65 0.15 140);     /* Vert - Sport/Nature */
+  --accent-green-light: oklch(0.90 0.06 140);
+  --accent-orange: oklch(0.70 0.16 50);     /* Orange - Créativité */
+  --accent-orange-light: oklch(0.92 0.07 50);
+  --accent-pink: oklch(0.65 0.18 340);      /* Rose - Social/Relationnel */
+  --accent-pink-light: oklch(0.90 0.08 340);
+  --accent-teal: oklch(0.60 0.14 180);      /* Turquoise - Apprentissage */
+  --accent-teal-light: oklch(0.88 0.06 180);
+  
+  /* ========================================
+     STATUS COLORS - Feedback & États
+     ======================================== */
+  --success: oklch(0.65 0.15 145);          /* Succès - habitude complétée */
+  --success-light: oklch(0.92 0.06 145);
+  --warning: oklch(0.75 0.14 80);           /* Attention - streak en danger */
+  --warning-light: oklch(0.94 0.06 80);
+  --error: oklch(0.60 0.20 25);             /* Erreur - habitude manquée */
+  --error-light: oklch(0.92 0.08 25);
+  --info: oklch(0.60 0.16 240);             /* Info - tips et suggestions */
+  --info-light: oklch(0.90 0.07 240);
+  
+  /* ========================================
+     SHADCN/UI COMPONENT TOKENS - Light Mode
+     ======================================== */
+  --card: oklch(1 0 0);                     /* Blanc pur pour cards */
+  --card-foreground: oklch(0.15 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --popover-foreground: oklch(0.15 0 0);
+  --primary: oklch(0.60 0.20 290);          /* Primary = Purple accent */
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.96 0 0);
+  --secondary-foreground: oklch(0.15 0 0);
+  --muted: oklch(0.95 0 0);
+  --muted-foreground: oklch(0.55 0 0);
+  --accent: oklch(0.96 0 0);
+  --accent-foreground: oklch(0.15 0 0);
+  --destructive: oklch(0.60 0.20 25);       /* Rouge pour actions destructives */
+  --border: oklch(0.88 0 0);
+  --input: oklch(0.95 0 0);
+  --ring: oklch(0.60 0.20 290);             /* Ring = Primary purple */
+  
+  /* Chart colors - Habit analytics */
+  --chart-1: oklch(0.60 0.20 290);          /* Purple */
+  --chart-2: oklch(0.55 0.18 240);          /* Blue */
+  --chart-3: oklch(0.65 0.15 140);          /* Green */
+  --chart-4: oklch(0.70 0.16 50);           /* Orange */
+  --chart-5: oklch(0.65 0.18 340);          /* Pink */
+  
+  /* Sidebar tokens */
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.15 0 0);
+  --sidebar-primary: oklch(0.60 0.20 290);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.96 0 0);
+  --sidebar-accent-foreground: oklch(0.15 0 0);
+  --sidebar-border: oklch(0.88 0 0);
+  --sidebar-ring: oklch(0.60 0.20 290);
 }
 
 .dark {
-  /* Base tokens */
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
+  /* ========================================
+     BASE TOKENS - Dark Mode
+     ======================================== */
+  --background: oklch(0.10 0 0);
+  --foreground: oklch(0.95 0 0);
   
-  /* Background semantic tokens - Dark mode */
-  --background-100: oklch(0.08 0 0);        /* Noir profond - main bg */
-  --background-200: oklch(0.12 0 0);        /* Noir très foncé - subtle bg */
-  --background-300: oklch(0.16 0 0);        /* Gris très foncé - cards, sections */
-  --background-400: oklch(0.20 0 0);        /* Gris foncé - hover states */
-  --background-500: oklch(0.25 0 0);        /* Gris moyen foncé - borders, dividers */
+  /* ========================================
+     BACKGROUND SEMANTIC TOKENS - Dark Mode
+     Hiérarchie d'élévation et de profondeur
+     ======================================== */
+  --background-100: oklch(0.10 0 0);        /* Main app background - noir profond */
+  --background-200: oklch(0.13 0 0);        /* Subtle background - conteneur principal */
+  --background-300: oklch(0.17 0 0);        /* Cards elevated - cards surélevées */
+  --background-400: oklch(0.21 0 0);        /* Hover states - interaction */
+  --background-500: oklch(0.26 0 0);        /* Borders & dividers - séparateurs */
   
-  /* Foreground semantic tokens - Dark mode */
-  --foreground-100: oklch(0.30 0 0);        /* Très foncé - disabled text */
-  --foreground-200: oklch(0.45 0 0);        /* Foncé - placeholder text */
-  --foreground-300: oklch(0.60 0 0);        /* Moyen foncé - secondary text */
-  --foreground-400: oklch(0.70 0 0);        /* Moyen - tertiary text */
-  --foreground-500: oklch(0.80 0 0);        /* Moyen clair - body text */
-  --foreground-600: oklch(0.85 0 0);        /* Clair - headings */
-  --foreground-700: oklch(0.90 0 0);        /* Très clair - emphasis */
-  --foreground-800: oklch(0.95 0 0);        /* Presque blanc - primary text */
-  --foreground-900: oklch(0.98 0 0);        /* Blanc - high contrast */
+  /* ========================================
+     FOREGROUND SEMANTIC TOKENS - Dark Mode
+     Hiérarchie typographique et états
+     ======================================== */
+  --foreground-100: oklch(0.35 0 0);        /* Disabled text - désactivé */
+  --foreground-200: oklch(0.50 0 0);        /* Placeholder text - champs vides */
+  --foreground-300: oklch(0.60 0 0);        /* Secondary text - descriptions, labels */
+  --foreground-400: oklch(0.68 0 0);        /* Tertiary text - métadonnées */
+  --foreground-500: oklch(0.76 0 0);        /* Body text - texte standard */
+  --foreground-600: oklch(0.82 0 0);        /* Subheadings - sous-titres */
+  --foreground-700: oklch(0.88 0 0);        /* Headings - titres principaux */
+  --foreground-800: oklch(0.93 0 0);        /* Primary text - texte important */
+  --foreground-900: oklch(0.98 0 0);        /* High contrast - maximum contraste */
   
-  /* Existing shadcn dark tokens */
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* ========================================
+     ACCENT COLORS - Habit Categories (Dark)
+     Couleurs vibrantes ajustées pour dark mode
+     ======================================== */
+  --accent-purple: oklch(0.70 0.22 290);    /* Violet - plus lumineux en dark */
+  --accent-purple-light: oklch(0.25 0.12 290);
+  --accent-blue: oklch(0.65 0.20 240);      /* Bleu - ajusté */
+  --accent-blue-light: oklch(0.22 0.10 240);
+  --accent-green: oklch(0.72 0.17 140);     /* Vert - plus visible */
+  --accent-green-light: oklch(0.24 0.09 140);
+  --accent-orange: oklch(0.75 0.18 50);     /* Orange - lumineux */
+  --accent-orange-light: oklch(0.26 0.10 50);
+  --accent-pink: oklch(0.72 0.20 340);      /* Rose - ajusté */
+  --accent-pink-light: oklch(0.24 0.11 340);
+  --accent-teal: oklch(0.68 0.16 180);      /* Turquoise - harmonieux */
+  --accent-teal-light: oklch(0.23 0.08 180);
+  
+  /* ========================================
+     STATUS COLORS - Feedback & États (Dark)
+     ======================================== */
+  --success: oklch(0.72 0.17 145);          /* Succès - vert plus clair */
+  --success-light: oklch(0.24 0.09 145);
+  --warning: oklch(0.78 0.16 80);           /* Attention - jaune visible */
+  --warning-light: oklch(0.27 0.09 80);
+  --error: oklch(0.68 0.22 25);             /* Erreur - rouge ajusté */
+  --error-light: oklch(0.23 0.12 25);
+  --info: oklch(0.68 0.18 240);             /* Info - bleu clair */
+  --info-light: oklch(0.23 0.10 240);
+  
+  /* ========================================
+     SHADCN/UI COMPONENT TOKENS - Dark Mode
+     ======================================== */
+  --card: oklch(0.17 0 0);                  /* Cards légèrement élevées */
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.17 0 0);
+  --popover-foreground: oklch(0.95 0 0);
+  --primary: oklch(0.70 0.22 290);          /* Primary = Purple accent (dark) */
+  --primary-foreground: oklch(0.10 0 0);
+  --secondary: oklch(0.21 0 0);
+  --secondary-foreground: oklch(0.95 0 0);
+  --muted: oklch(0.21 0 0);
+  --muted-foreground: oklch(0.60 0 0);
+  --accent: oklch(0.21 0 0);
+  --accent-foreground: oklch(0.95 0 0);
+  --destructive: oklch(0.68 0.22 25);       /* Rouge pour actions destructives */
+  --border: oklch(0.26 0 0);
+  --input: oklch(0.21 0 0);
+  --ring: oklch(0.70 0.22 290);             /* Ring = Primary purple */
+  
+  /* Chart colors - Habit analytics (dark) */
+  --chart-1: oklch(0.70 0.22 290);          /* Purple */
+  --chart-2: oklch(0.65 0.20 240);          /* Blue */
+  --chart-3: oklch(0.72 0.17 140);          /* Green */
+  --chart-4: oklch(0.75 0.18 50);           /* Orange */
+  --chart-5: oklch(0.72 0.20 340);          /* Pink */
+  
+  /* Sidebar tokens (dark) */
+  --sidebar: oklch(0.17 0 0);
+  --sidebar-foreground: oklch(0.95 0 0);
+  --sidebar-primary: oklch(0.70 0.22 290);
+  --sidebar-primary-foreground: oklch(0.10 0 0);
+  --sidebar-accent: oklch(0.21 0 0);
+  --sidebar-accent-foreground: oklch(0.95 0 0);
+  --sidebar-border: oklch(0.26 0 0);
+  --sidebar-ring: oklch(0.70 0.22 290);
 }
 
 @layer base {
