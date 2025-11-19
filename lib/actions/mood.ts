@@ -19,7 +19,6 @@ const moodSchema = z.object({
 // ========================================
 
 type CreateMoodInput = z.infer<typeof moodSchema> & { userId: string }
-type UpdateMoodInput = z.infer<typeof moodSchema> & { userId: string; id: string }
 
 // ========================================
 // SERVER ACTIONS
@@ -70,7 +69,7 @@ export async function createMoodEntry(data: CreateMoodInput) {
     }
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return { success: false, error: error.errors[0].message }
+      return { success: false, error: error.issues[0].message }
     }
     console.error('Error creating/updating mood:', error)
     return { success: false, error: 'Erreur lors de l\'enregistrement du mood' }
@@ -82,7 +81,7 @@ export async function createMoodEntry(data: CreateMoodInput) {
  */
 export async function getMoodEntries(userId: string, startDate?: Date, endDate?: Date) {
   try {
-    const whereClause: any = { userId }
+    const whereClause: { userId: string; date?: { gte?: Date; lte?: Date } } = { userId }
 
     // Si des dates sont fournies, filtrer par période
     if (startDate || endDate) {

@@ -10,15 +10,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Card } from '@/components/ui/card'
-import { HABIT_COLORS, HabitColorKey, HABIT_COLOR_KEYS } from '@/lib/design-tokens'
+import { HABIT_COLORS, HABIT_COLOR_KEYS } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
 import { EmojiPickerDrawer } from '@/components/habits/EmojiPickerDrawer'
 import { Check } from 'lucide-react'
@@ -152,7 +144,7 @@ export function CreateHabitForm({ userId, userLevel }: CreateHabitFormProps) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Nom */}
       <div className="space-y-2">
-        <Label htmlFor="name">Nom de l'habitude *</Label>
+        <Label htmlFor="name">Nom de l&apos;habitude *</Label>
         <Input
           id="name"
           placeholder="Ex: Méditer 10 minutes"

@@ -37,7 +37,7 @@ interface BaseHabitCardProps {
 export function DailyHabitCard({ habit, onToggleComplete, onOpen, className }: BaseHabitCardProps) {
   const streak = calculateStreak(habit)
   const completed = isCompletedToday(habit)
-  const colorClass = getHabitColorClass((habit.color as any) || 'purple', 'light')
+  const colorClass = getHabitColorClass((habit.color || 'purple') as 'purple' | 'blue' | 'green' | 'orange' | 'pink' | 'teal', 'light')
 
   return (
     <Card
@@ -104,8 +104,7 @@ export function DailyHabitCard({ habit, onToggleComplete, onOpen, className }: B
 
 export function WeeklyHabitCard({ habit, onToggleComplete, onOpen, className }: BaseHabitCardProps) {
   const streak = calculateStreak(habit)
-  const completed = isCompletedToday(habit)
-  const colorClass = getHabitColorClass((habit.color as any) || 'purple', 'light')
+  const colorClass = getHabitColorClass((habit.color || 'purple') as 'purple' | 'blue' | 'green' | 'orange' | 'pink' | 'teal', 'light')
   const weekDaysLabel = getWeekDaysLabels(habit.weekDays as number[] | null)
 
   // Calculer la progression de la semaine
@@ -208,7 +207,7 @@ export function WeeklyHabitCard({ habit, onToggleComplete, onOpen, className }: 
 export function MonthlyHabitCard({ habit, onToggleComplete, onOpen, className }: BaseHabitCardProps) {
   const streak = calculateStreak(habit)
   const { current, goal, percentage } = getCompletionProgress(habit)
-  const colorClass = getHabitColorClass((habit.color as any) || 'purple', 'light')
+  const colorClass = getHabitColorClass((habit.color || 'purple') as 'purple' | 'blue' | 'green' | 'orange' | 'pink' | 'teal', 'light')
 
   return (
     <Card

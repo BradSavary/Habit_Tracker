@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { HabitCard } from '@/components/habits/HabitCard'
 import { HabitWithCompletions } from '@/lib/habits-utils'
@@ -25,7 +25,7 @@ interface DashboardContentProps {
 
 export function DashboardContent({ todayHabits, otherHabits, userId }: DashboardContentProps) {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
 
   const handleToggleComplete = async (habitId: string, habitName: string) => {
     startTransition(async () => {
@@ -61,7 +61,7 @@ export function DashboardContent({ todayHabits, otherHabits, userId }: Dashboard
         }
       } else {
         toast.error('Erreur', {
-          description: result.error || 'Impossible de mettre à jour l\'habitude',
+          description: result.error || 'Impossible de mettre à jour l&apos;habitude',
         })
       }
     })
@@ -78,7 +78,7 @@ export function DashboardContent({ todayHabits, otherHabits, userId }: Dashboard
         <section>
           <div className="mb-4">
             <h2 className="text-xl font-bold text-foreground-800">
-              Aujourd'hui
+              Aujourd&apos;hui
             </h2>
             <p className="text-sm text-foreground-400">
               {todayHabits.length} habitude{todayHabits.length > 1 ? 's' : ''} à faire

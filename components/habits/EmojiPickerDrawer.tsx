@@ -3,7 +3,6 @@
 import { useState, useMemo } from 'react'
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerDescription,
   DrawerFooter,
@@ -14,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Search, Lock } from 'lucide-react'
-import { getAvailableEmojis, EmojiReward } from '@/lib/emojis-system'
+import { getAvailableEmojis } from '@/lib/emojis-system'
 
 /**
  * EmojiPickerDrawer - Sélecteur d'emoji personnalisé avec système de niveaux

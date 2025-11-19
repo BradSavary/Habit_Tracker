@@ -12,7 +12,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
-import { createMoodEntry, deleteMoodEntry } from '@/lib/actions/mood'
+import { createMoodEntry } from '@/lib/actions/mood'
 import { toast } from 'sonner'
 
 type MoodEntry = {

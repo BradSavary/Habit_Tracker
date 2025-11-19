@@ -5,7 +5,7 @@ import { Progress } from '@/components/ui/progress'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Trophy, Star, Lock } from 'lucide-react'
 import { getProgressionStats } from '@/lib/progression'
-import { getAvailableEmojis, EMOJI_REWARDS, countUnlockedEmojis, getNextEmojis } from '@/lib/emojis-system'
+import { EMOJI_REWARDS, countUnlockedEmojis } from '@/lib/emojis-system'
 
 /**
  * ProfileContent - Contenu de la page profil
@@ -30,9 +30,7 @@ type ProfileContentProps = {
 
 export function ProfileContent({ user, stats }: ProfileContentProps) {
   const progression = getProgressionStats(user.xp)
-  const unlockedEmojis = getAvailableEmojis(user.level)
   const emojiStats = countUnlockedEmojis(user.level)
-  const nextEmojis = getNextEmojis(user.level, 5)
 
   return (
     <div className="space-y-6">

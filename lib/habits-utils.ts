@@ -18,7 +18,7 @@ export interface HabitWithCompletions {
   category?: string | null
   color?: string | null
   frequency: string
-  weekDays?: any // Json type de Prisma
+  weekDays?: number[] | null // Json type de Prisma contenant un tableau de nombres
   monthlyGoal?: number | null
   completions: HabitCompletion[]
 }
@@ -49,7 +49,7 @@ export function calculateStreak(habit: HabitWithCompletions, today: Date = new D
   )
 
   let streak = 0
-  let checkDate = new Date(currentDate)
+  const checkDate = new Date(currentDate)
 
   // Pour daily: vérifier chaque jour consécutif
   if (habit.frequency === 'daily') {
@@ -86,7 +86,7 @@ export function calculateStreak(habit: HabitWithCompletions, today: Date = new D
  */
 function calculateWeeklyStreak(completions: HabitCompletion[], currentDate: Date): number {
   let streak = 0
-  let checkWeekStart = getWeekStart(currentDate)
+  const checkWeekStart = getWeekStart(currentDate)
 
   const completionsByWeek = new Map<string, boolean>()
 
@@ -111,7 +111,7 @@ function calculateWeeklyStreak(completions: HabitCompletion[], currentDate: Date
  */
 function calculateMonthlyStreak(completions: HabitCompletion[], currentDate: Date): number {
   let streak = 0
-  let checkMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+  const checkMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
 
   const completionsByMonth = new Map<string, boolean>()
 

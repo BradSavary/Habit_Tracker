@@ -52,18 +52,18 @@ export function HabitDetailContent({ habit, userId }: HabitDetailContentProps) {
 
   const streak = calculateStreak({
     ...habit,
-    weekDays: habit.weekDays || null,
-  } as any)
+    weekDays: (habit.weekDays as number[] | null) || null,
+  })
   const completed = isCompletedToday({
     ...habit,
-    weekDays: habit.weekDays || null,
-  } as any)
+    weekDays: (habit.weekDays as number[] | null) || null,
+  })
   const { current, goal, percentage } = getCompletionProgress({
     ...habit,
-    weekDays: habit.weekDays || null,
-  } as any)
+    weekDays: (habit.weekDays as number[] | null) || null,
+  })
 
-  const colorClass = getHabitColorClass((habit.color as any) || 'purple', 'light')
+  const colorClass = getHabitColorClass((habit.color || 'purple') as 'purple' | 'blue' | 'green' | 'orange' | 'pink' | 'teal', 'light')
 
   // Calculer les stats
   const totalCompletions = habit.completions.length
@@ -237,7 +237,7 @@ export function HabitDetailContent({ habit, userId }: HabitDetailContentProps) {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-[2px] ring-1 ring-primary ring-offset-1" />
-                  <span>Aujourd'hui</span>
+                  <span>Aujourd&apos;hui</span>
                 </div>
               </div>
             </div>
@@ -276,7 +276,7 @@ export function HabitDetailContent({ habit, userId }: HabitDetailContentProps) {
             <p className="text-sm text-foreground-500">Fréquence</p>
             <p className="text-foreground-800">
               {habit.frequency === 'daily' && 'Quotidienne'}
-              {habit.frequency === 'weekly' && `Hebdomadaire - ${getWeekDaysLabels(habit.weekDays as any)}`}
+              {habit.frequency === 'weekly' && `Hebdomadaire - ${getWeekDaysLabels(habit.weekDays as number[] | null)}`}
               {habit.frequency === 'monthly' && `Mensuelle - ${habit.monthlyGoal} fois par mois`}
             </p>
           </div>
@@ -344,7 +344,7 @@ export function HabitDetailContent({ habit, userId }: HabitDetailContentProps) {
           className="flex-1"
           variant={completed ? 'outline' : 'default'}
         >
-          {completed ? 'Annuler aujourd\'hui' : 'Compléter aujourd\'hui'}
+          {completed ? 'Annuler aujourd&apos;hui' : 'Compléter aujourd&apos;hui'}
         </Button>
 
         {/* Éditer (TODO: Implémenter plus tard) */}

@@ -63,7 +63,7 @@ export async function createHabit(data: CreateHabitInput) {
     return { success: true, habit }
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return { success: false, error: error.errors[0].message }
+      return { success: false, error: error.issues[0].message }
     }
     console.error('Error creating habit:', error)
     return { success: false, error: 'Erreur lors de la création de l\'habitude' }
@@ -159,7 +159,7 @@ export async function updateHabit(data: UpdateHabitInput) {
     return { success: true, habit }
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return { success: false, error: error.errors[0].message }
+      return { success: false, error: error.issues[0].message }
     }
     console.error('Error updating habit:', error)
     return { success: false, error: 'Erreur lors de la mise à jour de l\'habitude' }
