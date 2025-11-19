@@ -218,7 +218,7 @@ export function CreateHabitForm({ userId, userLevel }: CreateHabitFormProps) {
       {/* Fréquence */}
       <div className="space-y-2">
         <Label>Fréquence *</Label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="flex justify-between gap-1">
           {[
             { value: 'daily', label: 'Quotidienne' },
             { value: 'weekly', label: 'Hebdomadaire' },
@@ -229,7 +229,7 @@ export function CreateHabitForm({ userId, userLevel }: CreateHabitFormProps) {
               type="button"
               onClick={() => setValue('frequency', freq.value as CreateHabitFormData['frequency'])}
               className={cn(
-                'py-3 px-4 rounded-lg text-sm font-medium transition-all cursor-pointer',
+                'min-w-fit py-3 rounded-lg text-sm font-medium transition-all cursor-pointer pl-[0.5rem] pr-[0.5rem]',
                 selectedFrequency === freq.value
                   ? 'bg-[var(--accent-purple)] text-background-100'
                   : 'bg-background-300 text-foreground-600 hover:bg-background-400'

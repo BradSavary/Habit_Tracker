@@ -42,7 +42,7 @@ export default async function CreateHabitPage() {
                 Nouvelle habitude
               </h1>
               <p className="text-sm text-foreground-400">
-                Créez une habitude pour atteindre vos objectifs
+                Créez une nouvelle habitude
               </p>
             </div>
           </div>

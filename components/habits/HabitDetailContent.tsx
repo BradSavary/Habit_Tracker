@@ -344,7 +344,7 @@ export function HabitDetailContent({ habit, userId }: HabitDetailContentProps) {
           className="flex-1"
           variant={completed ? 'outline' : 'default'}
         >
-          {completed ? 'Annuler aujourd&apos;hui' : 'Compléter aujourd&apos;hui'}
+          {completed ? 'Annuler aujourd\'hui' : 'Compléter aujourd\'hui'}
         </Button>
 
         {/* Éditer (TODO: Implémenter plus tard) */}
