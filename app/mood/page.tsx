@@ -27,11 +27,24 @@ export default async function MoodPage() {
   const { moods } = await getMoodEntries(session.user.id, startOfMonth, endOfMonth)
 
   return (
-    <>
-      <Suspense fallback={<div>Chargement...</div>}>
-        <MoodContent userId={session.user.id} initialMoods={moods || []} />
-      </Suspense>
+    <div className="min-h-screen bg-background-100 pb-20">
+      {/* Header */}
+      <header className="bg-background-200 border-b border-background-500 sticky top-0 z-40">
+        <div className="container mx-auto px-4 py-4">
+          <h1 className="text-2xl font-bold text-foreground-800">
+            Mon Humeur
+          </h1>
+        </div>
+      </header>
+
+      {/* Content */}
+      <main className="container mx-auto px-4 py-6">
+        <Suspense fallback={<div>Chargement...</div>}>
+          <MoodContent userId={session.user.id} initialMoods={moods || []} />
+        </Suspense>
+      </main>
+
       <BottomNav />
-    </>
+    </div>
   )
 }

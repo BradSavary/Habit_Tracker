@@ -145,9 +145,9 @@ export function MoodContent({ userId, initialMoods }: MoodContentProps) {
   const calendarDays = generateCalendarDays()
 
   return (
-    <div className="min-h-screen bg-background pb-20 px-4">
-      {/* En-tête */}
-      <div className="flex items-center justify-between py-6">
+    <div className="space-y-6">
+      {/* En-tête mois */}
+      <div className="flex items-center justify-between">
         <Button
           variant="ghost"
           size="icon"

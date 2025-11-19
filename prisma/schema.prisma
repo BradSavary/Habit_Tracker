@@ -106,9 +106,23 @@ model HabitCompletion {
   habit       Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
   completedAt DateTime @default(now())
   notes       String?
+  createdAt   DateTime @default(now()) // Pour tracker la première création
 
   @@unique([habitId, completedAt])
   @@map("habit_completions")
+}
+
+// Modèle pour tracker les XP accordés (ne se supprime jamais)
+model HabitXpGrant {
+  id          String   @id @default(cuid())
+  habitId     String
+  userId      String
+  xpGranted   Int
+  grantedDate DateTime // Date normalisée (00:00:00)
+  createdAt   DateTime @default(now())
+
+  @@unique([habitId, userId, grantedDate])
+  @@map("habit_xp_grants")
 }
 
 // Modèle MoodEntry pour le suivi de l'humeur quotidienne

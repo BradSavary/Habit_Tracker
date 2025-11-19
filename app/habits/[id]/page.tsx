@@ -2,6 +2,7 @@ import { redirect, notFound } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { getHabitById } from '@/lib/actions/habits'
 import { HabitDetailContent } from '@/components/habits/HabitDetailContent'
+import { BottomNav } from '@/components/navigation/BottomNav'
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -74,6 +75,9 @@ export default async function HabitDetailPage({
       <main className="container mx-auto px-4 py-6">
         <HabitDetailContent habit={habit} userId={session.user.id} />
       </main>
+
+      {/* Bottom Navigation */}
+      <BottomNav />
     </div>
   )
 }

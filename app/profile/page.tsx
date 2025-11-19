@@ -29,9 +29,7 @@ export default async function ProfilePage() {
       xp: true,
       habits: {
         select: {
-          completions: {
-            select: { completedAt: true },
-          },
+          frequency: true,
         },
       },
     },
@@ -41,11 +39,10 @@ export default async function ProfilePage() {
     redirect('/login')
   }
 
-  // Compter les complétions totales
-  const totalCompletions = user.habits.reduce(
-    (sum, habit) => sum + habit.completions.length,
-    0
-  )
+  // Compter les habitudes par fréquence
+  const dailyHabits = user.habits.filter(h => h.frequency === 'daily').length
+  const weeklyHabits = user.habits.filter(h => h.frequency === 'weekly').length
+  const monthlyHabits = user.habits.filter(h => h.frequency === 'monthly').length
 
   return (
     <div className="min-h-screen bg-background-100 pb-20">
@@ -69,7 +66,9 @@ export default async function ProfilePage() {
           }}
           stats={{
             totalHabits: user.habits.length,
-            totalCompletions,
+            dailyHabits,
+            weeklyHabits,
+            monthlyHabits,
           }}
         />
       </main>
