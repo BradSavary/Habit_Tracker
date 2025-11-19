@@ -28,12 +28,8 @@ export default async function DashboardPage() {
   // Récupérer les habitudes de l'utilisateur
   const { habits } = await getHabits(session.user.id)
 
-  // Grouper les habitudes (cast weekDays pour correspondre au type attendu)
-  const habitsWithTypedWeekDays = (habits || []).map(habit => ({
-    ...habit,
-    weekDays: habit.weekDays as number[] | null
-  }))
-  const { todayHabits, otherHabits } = groupHabits(habitsWithTypedWeekDays)
+  // Grouper les habitudes
+  const { todayHabits, otherHabits } = groupHabits(habits || [])
 
   return (
     <div className="min-h-screen bg-background-100 pb-20">
