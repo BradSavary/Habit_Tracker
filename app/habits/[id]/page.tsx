@@ -5,6 +5,7 @@ import { HabitDetailContent } from '@/components/habits/HabitDetailContent'
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { Habit, HabitCompletion } from '@prisma/client'
 
 /**
  * Page de détail d'une habitude
@@ -35,6 +36,9 @@ export default async function HabitDetailPage({
     notFound()
   }
 
+  // Cast du type pour inclure tous les champs du modèle Habit
+  const habit = result.habit as Habit & { completions: HabitCompletion[] }
+
   return (
     <div className="min-h-screen bg-background-100 pb-20">
       {/* Header */}
@@ -51,14 +55,14 @@ export default async function HabitDetailPage({
                 className="text-3xl"
                 style={{ fontFamily: '"Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif' }}
               >
-                {result.habit.emoji || '✨'}
+                {habit.emoji || '✨'}
               </div>
               <div>
                 <h1 className="text-xl font-bold text-foreground-800">
-                  {result.habit.name}
+                  {habit.name}
                 </h1>
-                {result.habit.category && (
-                  <p className="text-sm text-foreground-400">{result.habit.category}</p>
+                {habit.category && (
+                  <p className="text-sm text-foreground-400">{habit.category}</p>
                 )}
               </div>
             </div>
@@ -68,7 +72,7 @@ export default async function HabitDetailPage({
 
       {/* Content */}
       <main className="container mx-auto px-4 py-6">
-        <HabitDetailContent habit={result.habit} userId={session.user.id} />
+        <HabitDetailContent habit={habit} userId={session.user.id} />
       </main>
     </div>
   )
