@@ -3,7 +3,7 @@
  * Calculs de streaks, vérification de complétion, gestion des fréquences
  */
 
-import { HabitCompletion } from '@prisma/client'
+import { HabitCompletion, Prisma } from '@prisma/client'
 
 // ========================================
 // TYPES
@@ -18,7 +18,7 @@ export interface HabitWithCompletions {
   category?: string | null
   color?: string | null
   frequency: string
-  weekDays?: number[] | null // Json type de Prisma contenant un tableau de nombres
+  weekDays?: Prisma.JsonValue // Json type de Prisma (peut être string, number[], null, etc.)
   monthlyGoal?: number | null
   completions: HabitCompletion[]
 }
