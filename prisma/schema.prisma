@@ -24,7 +24,14 @@ model User {
   password      String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  
+  // Système de progression
+  level         Int       @default(1)
+  xp            Int       @default(0)
+  unlockedEmojis Json    @default("[]")
+  
   habits        Habit[]
+  moodEntries   MoodEntry[]
   accounts      Account[]
   sessions      Session[]
 
@@ -76,9 +83,13 @@ model Habit {
   id          String   @id @default(cuid())
   name        String
   description String?
-  color       String?
+  emoji       String?  // Emoji représentant l'habitude
+  category    String?  // Catégorie: Santé, Productivité, Sport, Créativité, Social, Apprentissage, Autre
+  color       String?  // Couleur accent (purple, blue, green, orange, pink, teal)
   icon        String?
   frequency   String   @default("daily") // daily, weekly, monthly
+  weekDays    Json?    // Pour weekly: [0,1,2,3,4,5,6] (dimanche à samedi)
+  monthlyGoal Int?     // Pour monthly: nombre de fois dans le mois
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
@@ -98,4 +109,19 @@ model HabitCompletion {
 
   @@unique([habitId, completedAt])
   @@map("habit_completions")
+}
+
+// Modèle MoodEntry pour le suivi de l'humeur quotidienne
+model MoodEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emoji     String   // Emoji représentant l'humeur
+  date      DateTime @default(now()) // Date du mood (normalisée au jour)
+  notes     String?  // Notes optionnelles sur l'humeur
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@map("mood_entries")
 }
