@@ -25,7 +25,7 @@ export function LandingFooter() {
   return (
     <footer className="border-t border-background-500 bg-background-200 py-8">
       <div className="container mx-auto px-4 text-center text-foreground-400">
-        <p>&copy; 2024 HabitTracker. Tous droits réservés.</p>
+        <p>&copy; 2025 HabitTracker. Tous droits réservés.</p>
       </div>
     </footer>
   );

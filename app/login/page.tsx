@@ -1,45 +1,202 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+"use client" // ✅ Justifié : useForm (React Hook Form) + useState pour gestion formulaire + onClick handlers
+
+import { useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import Link from "next/link"
+import { Mail, Lock, AlertCircle, CheckCircle2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { loginUser } from "@/lib/actions/auth"
+import { toast } from "sonner"
+
+const loginSchema = z.object({
+  email: z.string().email("Email invalide"),
+  password: z.string().min(1, "Le mot de passe est requis"),
+})
+
+type LoginFormData = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Récupérer les paramètres de l'URL
+  const verified = searchParams.get("verified")
+  const error = searchParams.get("error")
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    getValues,
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  })
+
+  const onSubmit = async (data: LoginFormData) => {
+    setIsLoading(true)
+
+    try {
+      const result = await loginUser(data)
+
+      if (result.success) {
+        toast.success(result.message || "Connexion réussie !")
+        router.push("/dashboard")
+        router.refresh()
+      } else {
+        toast.error(result.error || "Une erreur est survenue")
+      }
+    } catch (error) {
+      toast.error("Une erreur est survenue lors de la connexion")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background-100">
-      <div className="w-full max-w-md px-4">
-        <div className="bg-background-300 border border-background-500 rounded-lg p-8">
-          <h1 className="text-3xl font-bold text-foreground-900 mb-2 text-center">
-            Connexion
+    <div className="min-h-screen bg-background-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Logo / Titre */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-foreground-800 mb-2">
+            Habit Tracker
           </h1>
-          <p className="text-foreground-500 text-center mb-8">
-            Connectez-vous à votre compte HabitTracker
+          <p className="text-foreground-400">
+            Connectez-vous pour suivre vos habitudes
           </p>
-          
-          <div className="space-y-4">
-            <p className="text-foreground-600 text-center">
-              Page de connexion en construction
-            </p>
-            <p className="text-foreground-400 text-sm text-center">
-              L&apos;authentification NextAuth.js sera implémentée prochainement
-            </p>
-          </div>
-
-          <div className="mt-8 text-center">
-            <p className="text-foreground-500 text-sm">
-              Pas encore de compte ?{" "}
-              <Link href="/register" className="text-foreground-800 font-semibold hover:underline">
-                S&apos;inscrire
-              </Link>
-            </p>
-          </div>
-
-          <div className="mt-4">
-            <Link href="/">
-              <Button variant="outline" className="w-full">
-                Retour à l&apos;accueil
-              </Button>
-            </Link>
-          </div>
         </div>
+
+        {/* Messages de feedback */}
+        {verified && (
+          <div className="mb-6 p-4 bg-[var(--success-light)] border border-[var(--success)] rounded-lg flex items-start gap-3">
+            <CheckCircle2 className="h-5 w-5 text-[var(--success)] mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-foreground-700">
+                Email vérifié avec succès !
+              </p>
+              <p className="text-sm text-foreground-500 mt-1">
+                Vous pouvez maintenant vous connecter à votre compte.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-6 p-4 bg-[var(--error-light)] border border-[var(--error)] rounded-lg flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-[var(--error)] mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-foreground-700">
+                {error === "invalid_token"
+                  ? "Token de vérification invalide"
+                  : error === "verification_failed"
+                  ? "La vérification a échoué"
+                  : "Une erreur est survenue"}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Formulaire de connexion */}
+        <Card className="bg-background-300 border-background-500 shadow-lg">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl text-foreground-800">
+              Connexion
+            </CardTitle>
+            <CardDescription className="text-foreground-400">
+              Entrez vos identifiants pour accéder à votre compte
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              {/* Email */}
+              <div className="space-y-2">
+                <label
+                  htmlFor="email"
+                  className="text-sm font-medium text-foreground-700"
+                >
+                  Email
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground-300" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="vous@exemple.com"
+                    className="pl-10 bg-background-200 border-background-500 text-foreground-700 placeholder:text-foreground-200"
+                    {...register("email")}
+                  />
+                </div>
+                {errors.email && (
+                  <p className="text-sm text-[var(--error)]">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Mot de passe */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label
+                    htmlFor="password"
+                    className="text-sm font-medium text-foreground-700"
+                  >
+                    Mot de passe
+                  </label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm text-[var(--accent-purple)] hover:underline"
+                  >
+                    Mot de passe oublié ?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground-300" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    className="pl-10 bg-background-200 border-background-500 text-foreground-700 placeholder:text-foreground-200"
+                    {...register("password")}
+                  />
+                </div>
+                {errors.password && (
+                  <p className="text-sm text-[var(--error)]">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Bouton de connexion */}
+              <Button
+                type="submit"
+                className="w-full bg-[var(--accent-purple)] hover:bg-[var(--accent-purple)]/90 text-background-100 font-semibold"
+                disabled={isLoading}
+              >
+                {isLoading ? "Connexion en cours..." : "Se connecter"}
+              </Button>
+
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Lien inscription */}
+        <p className="mt-6 text-center text-sm text-foreground-400">
+          Pas encore de compte ?{" "}
+          <Link
+            href="/register"
+            className="font-semibold text-[var(--accent-purple)] hover:underline"
+          >
+            Créer un compte
+          </Link>
+        </p>
       </div>
     </div>
-  );
+  )
 }
