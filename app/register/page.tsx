@@ -107,7 +107,7 @@ export default function RegisterPage() {
             Créer un compte
           </CardTitle>
           <CardDescription className="text-foreground-500">
-            Commencez à suivre vos habitudes dès aujourd'hui
+            Commencez à suivre vos habitudes dès aujourd&apos;hui
           </CardDescription>
         </CardHeader>
 
@@ -276,7 +276,7 @@ export default function RegisterPage() {
           <div className="mt-4">
             <Link href="/">
               <Button variant="outline" className="w-full border-background-500 text-foreground-700 hover:bg-background-400">
-                Retour à l'accueil
+                Retour à l&apos;accueil
               </Button>
             </Link>
           </div>
