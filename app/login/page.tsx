@@ -1,12 +1,12 @@
 "use client" // ✅ Justifié : useForm (React Hook Form) + useState pour gestion formulaire + onClick handlers
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import Link from "next/link"
-import { Mail, Lock, AlertCircle, CheckCircle2 } from "lucide-react"
+import { Mail, Lock, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,20 +20,18 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
 
   // Récupérer les paramètres de l'URL
   const verified = searchParams.get("verified")
-  const error = searchParams.get("error")
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    getValues,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   })
@@ -51,7 +49,7 @@ export default function LoginPage() {
       } else {
         toast.error(result.error || "Une erreur est survenue")
       }
-    } catch (error) {
+    } catch {
       toast.error("Une erreur est survenue lors de la connexion")
     } finally {
       setIsLoading(false)
@@ -79,25 +77,10 @@ export default function LoginPage() {
             <CheckCircle2 className="h-5 w-5 text-[var(--success)] mt-0.5 flex-shrink-0" />
             <div>
               <p className="text-sm font-medium text-foreground-700">
-                Email vérifié avec succès !
+                Compte créé avec succès !
               </p>
               <p className="text-sm text-foreground-500 mt-1">
                 Vous pouvez maintenant vous connecter à votre compte.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {error && (
-          <div className="mb-6 p-4 bg-[var(--error-light)] border border-[var(--error)] rounded-lg flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-[var(--error)] mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="text-sm font-medium text-foreground-700">
-                {error === "invalid_token"
-                  ? "Token de vérification invalide"
-                  : error === "verification_failed"
-                  ? "La vérification a échoué"
-                  : "Une erreur est survenue"}
               </p>
             </div>
           </div>
@@ -198,5 +181,20 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-8 w-8 border-4 border-[var(--accent-purple)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-foreground-600">Chargement...</p>
+        </div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }

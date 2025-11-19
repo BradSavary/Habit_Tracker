@@ -4,7 +4,6 @@ import { z } from "zod"
 import { hash } from "bcryptjs"
 import prisma from "@/lib/prisma"
 import { signIn } from "@/lib/auth"
-import { AuthError } from "next-auth"
 
 // Schémas de validation
 const registerSchema = z.object({
@@ -56,7 +55,7 @@ export async function registerUser(
     const hashedPassword = await hash(validatedData.password, 12)
 
     // Créer l'utilisateur avec email automatiquement vérifié
-    const user = await prisma.user.create({
+    await prisma.user.create({
       data: {
         name: validatedData.name,
         email: validatedData.email,
@@ -127,7 +126,7 @@ export async function loginUser(
         success: true,
         message: "Connexion réussie !",
       }
-    } catch (signInError) {
+    } catch {
       // Si NextAuth rejette la connexion, c'est que le mot de passe est incorrect
       return {
         success: false,
