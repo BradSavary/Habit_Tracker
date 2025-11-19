@@ -167,18 +167,18 @@
   /* ========================================
      BASE TOKENS - Dark Mode
      ======================================== */
-  --background: oklch(0.10 0 0);
+  --background: oklch(0.12 0 0);            /* Background principal ajusté pour meilleur confort visuel */
   --foreground: oklch(0.95 0 0);
   
   /* ========================================
      BACKGROUND SEMANTIC TOKENS - Dark Mode
      Hiérarchie d'élévation et de profondeur
      ======================================== */
-  --background-100: oklch(0.10 0 0);        /* Main app background - noir profond */
-  --background-200: oklch(0.13 0 0);        /* Subtle background - conteneur principal */
-  --background-300: oklch(0.17 0 0);        /* Cards elevated - cards surélevées */
-  --background-400: oklch(0.21 0 0);        /* Hover states - interaction */
-  --background-500: oklch(0.26 0 0);        /* Borders & dividers - séparateurs */
+  --background-100: oklch(0.12 0 0);        /* Main app background - noir moins profond pour réduire fatigue oculaire */
+  --background-200: oklch(0.15 0 0);        /* Subtle background - conteneur principal */
+  --background-300: oklch(0.19 0 0);        /* Cards elevated - cards surélevées */
+  --background-400: oklch(0.23 0 0);        /* Hover states - interaction */
+  --background-500: oklch(0.28 0 0);        /* Borders & dividers - séparateurs */
   
   /* ========================================
      FOREGROUND SEMANTIC TOKENS - Dark Mode
@@ -214,34 +214,34 @@
   /* ========================================
      STATUS COLORS - Feedback & États (Dark)
      ======================================== */
-  --success: oklch(0.72 0.17 145);          /* Succès - vert plus clair */
-  --success-light: oklch(0.24 0.09 145);
-  --warning: oklch(0.78 0.16 80);           /* Attention - jaune visible */
-  --warning-light: oklch(0.27 0.09 80);
-  --error: oklch(0.68 0.22 25);             /* Erreur - rouge ajusté */
-  --error-light: oklch(0.23 0.12 25);
-  --info: oklch(0.68 0.18 240);             /* Info - bleu clair */
-  --info-light: oklch(0.23 0.10 240);
+  --success: oklch(0.75 0.19 145);          /* Succès - vert plus lumineux et saturé */
+  --success-light: oklch(0.26 0.11 145);
+  --warning: oklch(0.80 0.18 80);           /* Attention - jaune plus lumineux */
+  --warning-light: oklch(0.29 0.11 80);
+  --error: oklch(0.72 0.24 25);             /* Erreur - rouge plus visible */
+  --error-light: oklch(0.25 0.14 25);
+  --info: oklch(0.70 0.20 240);             /* Info - bleu plus lumineux */
+  --info-light: oklch(0.25 0.12 240);
   
   /* ========================================
      SHADCN/UI COMPONENT TOKENS - Dark Mode
      ======================================== */
-  --card: oklch(0.17 0 0);                  /* Cards légèrement élevées */
+  --card: oklch(0.19 0 0);                  /* Cards légèrement élevées - plus visible */
   --card-foreground: oklch(0.95 0 0);
-  --popover: oklch(0.17 0 0);
+  --popover: oklch(0.20 0 0);               /* Popover plus visible */
   --popover-foreground: oklch(0.95 0 0);
-  --primary: oklch(0.70 0.22 290);          /* Primary = Purple accent (dark) */
-  --primary-foreground: oklch(0.10 0 0);
-  --secondary: oklch(0.21 0 0);
+  --primary: oklch(0.72 0.24 290);          /* Primary = Purple accent (dark) - plus saturé */
+  --primary-foreground: oklch(0.98 0 0);    /* Foreground plus clair pour meilleur contraste */
+  --secondary: oklch(0.23 0 0);             /* Secondary plus visible */
   --secondary-foreground: oklch(0.95 0 0);
-  --muted: oklch(0.21 0 0);
-  --muted-foreground: oklch(0.60 0 0);
-  --accent: oklch(0.21 0 0);
+  --muted: oklch(0.23 0 0);                 /* Muted plus visible */
+  --muted-foreground: oklch(0.65 0 0);      /* Muted foreground plus clair */
+  --accent: oklch(0.24 0 0);                /* Accent plus contrasté */
   --accent-foreground: oklch(0.95 0 0);
-  --destructive: oklch(0.68 0.22 25);       /* Rouge pour actions destructives */
-  --border: oklch(0.26 0 0);
-  --input: oklch(0.21 0 0);
-  --ring: oklch(0.70 0.22 290);             /* Ring = Primary purple */
+  --destructive: oklch(0.70 0.24 25);       /* Rouge pour actions destructives - plus visible */
+  --border: oklch(0.28 0 0);                /* Borders plus visibles */
+  --input: oklch(0.23 0 0);                 /* Input backgrounds plus clairs */
+  --ring: oklch(0.72 0.24 290);             /* Ring = Primary purple */
   
   /* Chart colors - Habit analytics (dark) */
   --chart-1: oklch(0.70 0.22 290);          /* Purple */
