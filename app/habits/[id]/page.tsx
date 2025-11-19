@@ -37,7 +37,7 @@ export default async function HabitDetailPage({
   }
 
   // Cast du type pour inclure tous les champs du modèle Habit
-  const habit = result.habit as Habit & { completions: HabitCompletion[] }
+  const habit = result.habit as unknown as Habit & { completions: HabitCompletion[] }
 
   return (
     <div className="min-h-screen bg-background-100 pb-20">
