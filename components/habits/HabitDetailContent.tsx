@@ -151,6 +151,100 @@ export function HabitDetailContent({ habit, userId }: HabitDetailContentProps) {
         </div>
       </Card>
 
+      {/* Visualisation des complétions (si daily) */}
+      {habit.frequency === 'daily' && (
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-foreground-800">Historique</h3>
+            <Calendar className="h-5 w-5 text-foreground-400" />
+          </div>
+          
+          <div className="w-full overflow-x-auto">
+            <div className="min-w-max space-y-2">
+              {/* Légende des jours */}
+              <div className="grid grid-cols-7 gap-1.5 place-items-center mb-3">
+                {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, i) => (
+                  <div key={i} className="text-[10px] text-foreground-400 font-medium w-3 text-center">
+                    {day}
+                  </div>
+                ))}
+              </div>
+              
+              {/* Grille de points */}
+              <div className="grid grid-cols-7 gap-1.5 place-items-center">
+                {(() => {
+                  const today = new Date()
+                  today.setHours(0, 0, 0, 0)
+                  
+                  const startDate = new Date(today)
+                  startDate.setDate(startDate.getDate() - 90)
+                  
+                  const dayOfWeek = startDate.getDay()
+                  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+                  startDate.setDate(startDate.getDate() - daysToMonday)
+                  
+                  const days = []
+                  const currentDate = new Date(startDate)
+                  
+                  while (currentDate <= today) {
+                    days.push(new Date(currentDate))
+                    currentDate.setDate(currentDate.getDate() + 1)
+                  }
+                  
+                  const completionDates = new Set(
+                    habit.completions.map(c => {
+                      const d = new Date(c.completedAt)
+                      d.setHours(0, 0, 0, 0)
+                      return d.getTime()
+                    })
+                  )
+                  
+                  return days.map((date, index) => {
+                    const isCompleted = completionDates.has(date.getTime())
+                    const isToday = date.getTime() === today.getTime()
+                    const isFuture = date > today
+                    
+                    return (
+                      <div
+                        key={index}
+                        className={cn(
+                          'w-3 h-3 rounded-[2px] transition-colors',
+                          isCompleted && 'bg-primary',
+                          !isCompleted && !isFuture && 'bg-muted',
+                          isFuture && 'bg-background-200',
+                          isToday && 'ring-1 ring-primary ring-offset-1'
+                        )}
+                        title={date.toLocaleDateString('fr-FR', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      />
+                    )
+                  })
+                })()}
+              </div>
+              
+              {/* Légende */}
+              <div className="flex items-center gap-4 text-[10px] text-foreground-400 mt-4 pt-3 border-t border-background-300">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-[2px] bg-primary" />
+                  <span>Complété</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-[2px] bg-muted" />
+                  <span>Manqué</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-[2px] ring-1 ring-primary ring-offset-1" />
+                  <span>Aujourd'hui</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Progression (si monthly) */}
       {habit.frequency === 'monthly' && (
         <Card className="p-6">
