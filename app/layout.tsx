@@ -36,7 +36,11 @@ export default function RootLayout({
           storageKey="habit-tracker-theme"
         >
           {children}
-          <Toaster position="top-right" richColors />
+          <Toaster 
+            position="top-right" 
+            richColors 
+            theme="system"
+          />
         </ThemeProvider>
       </body>
     </html>

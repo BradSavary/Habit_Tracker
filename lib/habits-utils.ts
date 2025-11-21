@@ -226,10 +226,21 @@ export function getWeekDaysLabels(weekDays: number[] | null | undefined): string
 
 /**
  * Grouper les habitudes : Aujourd'hui vs Autres
+ * Habitudes d'aujourd'hui triées : non complétées en premier, complétées à la fin
  */
 export function groupHabits(habits: HabitWithCompletions[], today: Date = new Date()) {
-  const todayHabits = habits.filter((habit) => shouldShowToday(habit, today))
+  const todayHabitsUnsorted = habits.filter((habit) => shouldShowToday(habit, today))
   const otherHabits = habits.filter((habit) => !shouldShowToday(habit, today))
+
+  // Trier les habitudes d'aujourd'hui : non complétées en premier
+  const todayHabits = todayHabitsUnsorted.sort((a, b) => {
+    const aCompleted = isCompletedToday(a, today)
+    const bCompleted = isCompletedToday(b, today)
+    
+    // Non complétées (false) avant complétées (true)
+    if (aCompleted === bCompleted) return 0
+    return aCompleted ? 1 : -1
+  })
 
   return { todayHabits, otherHabits }
 }

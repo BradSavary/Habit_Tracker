@@ -81,7 +81,7 @@ export function DashboardContent({ todayHabits, otherHabits, userId }: Dashboard
               Aujourd&apos;hui
             </h2>
             <p className="text-sm text-foreground-400">
-              {todayHabits.length} habitude{todayHabits.length > 1 ? 's' : ''} à faire
+              {todayHabits.length} habitude{todayHabits.length > 1 ? 's' : ''} restante{todayHabits.length > 1 ? 's' : ''} aujourd&apos;hui
             </p>
           </div>
 

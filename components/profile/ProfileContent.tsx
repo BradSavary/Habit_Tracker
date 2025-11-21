@@ -1,9 +1,10 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { Trophy, Star, Lock } from 'lucide-react'
+import { Trophy, Star, Lock, ChevronRight } from 'lucide-react'
 import { getProgressionStats } from '@/lib/progression'
 import { EMOJI_REWARDS, countUnlockedEmojis } from '@/lib/emojis-system'
 
@@ -24,11 +25,14 @@ type ProfileContentProps = {
   }
   stats: {
     totalHabits: number
-    totalCompletions: number
+    dailyHabits: number
+    weeklyHabits: number
+    monthlyHabits: number
   }
 }
 
 export function ProfileContent({ user, stats }: ProfileContentProps) {
+  const router = useRouter()
   const progression = getProgressionStats(user.xp)
   const emojiStats = countUnlockedEmojis(user.level)
 
@@ -43,8 +47,11 @@ export function ProfileContent({ user, stats }: ProfileContentProps) {
         <ThemeToggle />
       </div>
 
-      {/* Carte Niveau & XP */}
-      <Card className="p-6 space-y-4">
+      {/* Carte Niveau & XP - Cliquable */}
+      <Card 
+        className="p-6 space-y-4 cursor-pointer hover:bg-background-400 transition-colors"
+        onClick={() => router.push('/profile/progression')}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-full bg-primary/10">
@@ -55,14 +62,17 @@ export function ProfileContent({ user, stats }: ProfileContentProps) {
               <p className="text-3xl font-bold text-foreground-800">{progression.level}</p>
             </div>
           </div>
-          {!progression.isMaxLevel && (
-            <div className="text-right">
-              <p className="text-sm text-foreground-400">Prochain niveau</p>
-              <p className="text-lg font-semibold text-foreground-700">
-                {progression.xpRemaining} XP
-              </p>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {!progression.isMaxLevel && (
+              <div className="text-right">
+                <p className="text-sm text-foreground-400">Prochain niveau</p>
+                <p className="text-lg font-semibold text-foreground-700">
+                  {progression.xpRemaining} XP
+                </p>
+              </div>
+            )}
+            <ChevronRight className="h-5 w-5 text-foreground-400" />
+          </div>
         </div>
 
         {/* Barre de progression */}
@@ -87,17 +97,24 @@ export function ProfileContent({ user, stats }: ProfileContentProps) {
         )}
       </Card>
 
-      {/* Statistiques */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="p-4">
-          <p className="text-sm text-foreground-400 mb-1">Habitudes</p>
-          <p className="text-2xl font-bold text-foreground-800">{stats.totalHabits}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-foreground-400 mb-1">Complétions</p>
-          <p className="text-2xl font-bold text-foreground-800">{stats.totalCompletions}</p>
-        </Card>
-      </div>
+      {/* Statistiques Habitudes */}
+      <Card className="p-6 space-y-4">
+        <h3 className="font-semibold text-foreground-800">Mes habitudes</h3>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-foreground-800">{stats.dailyHabits}</p>
+            <p className="text-sm text-foreground-400">Quotidiennes</p>
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-bold text-foreground-800">{stats.weeklyHabits}</p>
+            <p className="text-sm text-foreground-400">Hebdomadaires</p>
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-bold text-foreground-800">{stats.monthlyHabits}</p>
+            <p className="text-sm text-foreground-400">Mensuelles</p>
+          </div>
+        </div>
+      </Card>
 
       {/* Galerie d'emojis débloqués + 5 prochains */}
       <Card className="p-6 space-y-4">

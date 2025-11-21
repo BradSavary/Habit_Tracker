@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { createHabit } from '@/lib/actions/habits'
+import { Habit } from '@prisma/client'
+import { updateHabit } from '@/lib/actions/habits'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,7 +17,7 @@ import { EmojiPickerDrawer } from '@/components/habits/EmojiPickerDrawer'
 import { Check } from 'lucide-react'
 
 /**
- * CreateHabitForm - Formulaire de création d'habitude
+ * EditHabitForm - Formulaire d'édition d'habitude
  * 
  * Justification 'use client':
  * - React Hook Form pour gestion du formulaire
@@ -28,7 +29,7 @@ import { Check } from 'lucide-react'
 // VALIDATION SCHEMA
 // ========================================
 
-const createHabitSchema = z.object({
+const editHabitSchema = z.object({
   name: z.string().min(1, 'Le nom est requis').max(100, 'Le nom est trop long'),
   emoji: z.string().min(1, 'Sélectionnez un emoji'),
   color: z.enum(['purple', 'blue', 'green', 'orange', 'pink', 'teal']),
@@ -47,7 +48,7 @@ const createHabitSchema = z.object({
   monthlyGoal: z.number().min(1).max(31).optional(),
 })
 
-type CreateHabitFormData = z.infer<typeof createHabitSchema>
+type EditHabitFormData = z.infer<typeof editHabitSchema>
 
 const DAYS_OF_WEEK = [
   { value: 1, label: 'Lun' },
@@ -63,15 +64,17 @@ const DAYS_OF_WEEK = [
 // COMPONENT
 // ========================================
 
-interface CreateHabitFormProps {
+interface EditHabitFormProps {
+  habit: Habit
   userId: string
-  userLevel: number
 }
 
-export function CreateHabitForm({ userId, userLevel }: CreateHabitFormProps) {
+export function EditHabitForm({ habit, userId }: EditHabitFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [selectedDays, setSelectedDays] = useState<number[]>([])
+  const [selectedDays, setSelectedDays] = useState<number[]>(
+    (habit.weekDays as number[] | null) || []
+  )
 
   const {
     register,
@@ -79,19 +82,31 @@ export function CreateHabitForm({ userId, userLevel }: CreateHabitFormProps) {
     formState: { errors },
     watch,
     setValue,
-  } = useForm<CreateHabitFormData>({
-    resolver: zodResolver(createHabitSchema),
+  } = useForm<EditHabitFormData>({
+    resolver: zodResolver(editHabitSchema),
     defaultValues: {
-      color: 'purple',
-      category: 'Santé',
-      frequency: 'daily',
-      emoji: '✨',
+      name: habit.name,
+      emoji: habit.emoji || '✨',
+      color: (habit.color as EditHabitFormData['color']) || 'purple',
+      category: (habit.category as EditHabitFormData['category']) || 'Santé',
+      frequency: habit.frequency as EditHabitFormData['frequency'],
+      description: habit.description || '',
+      weekDays: (habit.weekDays as number[] | null) || undefined,
+      monthlyGoal: habit.monthlyGoal || undefined,
     },
   })
 
   const selectedEmoji = watch('emoji')
   const selectedColor = watch('color')
   const selectedFrequency = watch('frequency')
+
+  // Initialiser weekDays si weekly
+  useEffect(() => {
+    if (habit.frequency === 'weekly' && habit.weekDays) {
+      setSelectedDays(habit.weekDays as number[])
+      setValue('weekDays', habit.weekDays as number[])
+    }
+  }, [habit, setValue])
 
   // Toggle jour de la semaine
   const toggleDay = (day: number) => {
@@ -108,7 +123,7 @@ export function CreateHabitForm({ userId, userLevel }: CreateHabitFormProps) {
     })
   }
 
-  const onSubmit = (data: CreateHabitFormData) => {
+  const onSubmit = (data: EditHabitFormData) => {
     // Validation custom pour weekly
     if (data.frequency === 'weekly' && (!data.weekDays || data.weekDays.length === 0)) {
       toast.error('Sélectionnez au moins un jour de la semaine')
@@ -122,19 +137,20 @@ export function CreateHabitForm({ userId, userLevel }: CreateHabitFormProps) {
     }
 
     startTransition(async () => {
-      const result = await createHabit({
+      const result = await updateHabit({
         ...data,
+        id: habit.id,
         userId,
       })
 
       if (result.success) {
-        toast.success('Habitude créée ! 🎉', {
-          description: `"${data.name}" a été ajoutée à vos habitudes`,
+        toast.success('Habitude modifiée ! ✅', {
+          description: `"${data.name}" a été mise à jour`,
         })
-        router.push('/dashboard')
+        router.push(`/habits/${habit.id}`)
       } else {
         toast.error('Erreur', {
-          description: result.error || 'Impossible de créer l\'habitude',
+          description: result.error || 'Impossible de modifier l\'habitude',
         })
       }
     })
@@ -162,7 +178,7 @@ export function CreateHabitForm({ userId, userLevel }: CreateHabitFormProps) {
         <EmojiPickerDrawer
           selectedEmoji={selectedEmoji}
           onEmojiSelect={(emoji: string) => setValue('emoji', emoji)}
-          userLevel={userLevel}
+          userLevel={50}
         />
         {errors.emoji && (
           <p className="text-sm text-[var(--error)]">{errors.emoji.message}</p>
@@ -201,7 +217,7 @@ export function CreateHabitForm({ userId, userLevel }: CreateHabitFormProps) {
             <button
               key={cat}
               type="button"
-              onClick={() => setValue('category', cat as CreateHabitFormData['category'])}
+              onClick={() => setValue('category', cat as EditHabitFormData['category'])}
               className={cn(
                 'py-3 px-4 rounded-lg text-sm font-medium transition-all cursor-pointer',
                 watch('category') === cat
@@ -215,9 +231,12 @@ export function CreateHabitForm({ userId, userLevel }: CreateHabitFormProps) {
         </div>
       </div>
 
-      {/* Fréquence */}
+      {/* Fréquence (non modifiable, affichée pour info) */}
       <div className="space-y-2">
         <Label>Fréquence *</Label>
+        <p className="text-sm text-foreground-400 mb-2">
+          La fréquence ne peut pas être modifiée après création
+        </p>
         <div className="flex justify-between gap-1">
           {[
             { value: 'daily', label: 'Quotidienne' },
@@ -227,12 +246,12 @@ export function CreateHabitForm({ userId, userLevel }: CreateHabitFormProps) {
             <button
               key={freq.value}
               type="button"
-              onClick={() => setValue('frequency', freq.value as CreateHabitFormData['frequency'])}
+              disabled
               className={cn(
-                'min-w-fit py-3 rounded-lg text-sm font-medium transition-all cursor-pointer pl-[0.5rem] pr-[0.5rem]',
+                'min-w-fit py-3 rounded-lg text-sm font-medium pl-[0.5rem] pr-[0.5rem]',
                 selectedFrequency === freq.value
-                  ? 'bg-[var(--accent-purple)] text-background-100'
-                  : 'bg-background-300 text-foreground-600 hover:bg-background-400'
+                  ? 'bg-[var(--accent-purple)] text-background-100 cursor-not-allowed opacity-75'
+                  : 'bg-background-300 text-foreground-600 opacity-50 cursor-not-allowed'
               )}
             >
               {freq.label}
@@ -311,7 +330,7 @@ export function CreateHabitForm({ userId, userLevel }: CreateHabitFormProps) {
           Annuler
         </Button>
         <Button type="submit" disabled={isPending} className="flex-1">
-          {isPending ? 'Création...' : 'Créer l\'habitude'}
+          {isPending ? 'Modification...' : 'Enregistrer'}
         </Button>
       </div>
     </form>
