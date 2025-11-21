@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
@@ -35,9 +36,34 @@ interface BaseHabitCardProps {
 // ========================================
 
 export function DailyHabitCard({ habit, onToggleComplete, onOpen, className }: BaseHabitCardProps) {
+  const [clickTimeout, setClickTimeout] = useState<NodeJS.Timeout | null>(null)
+  
   const streak = calculateStreak(habit)
   const completed = isCompletedToday(habit)
   const colorClass = getHabitColorClass((habit.color || 'purple') as 'purple' | 'blue' | 'green' | 'orange' | 'pink' | 'teal', 'light')
+
+  const handleCircleClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onToggleComplete()
+  }
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    
+    if (clickTimeout) {
+      // Double-clic détecté
+      clearTimeout(clickTimeout)
+      setClickTimeout(null)
+      onToggleComplete()
+    } else {
+      // Premier clic, attendre le double-clic potentiel
+      const timeout = setTimeout(() => {
+        setClickTimeout(null)
+        onOpen()
+      }, 300)
+      setClickTimeout(timeout)
+    }
+  }
 
   return (
     <Card
@@ -47,11 +73,7 @@ export function DailyHabitCard({ habit, onToggleComplete, onOpen, className }: B
         completed && 'opacity-75',
         className
       )}
-      onClick={onOpen}
-      onDoubleClick={(e) => {
-        e.stopPropagation()
-        onToggleComplete()
-      }}
+      onClick={handleCardClick}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1">
@@ -81,13 +103,14 @@ export function DailyHabitCard({ habit, onToggleComplete, onOpen, className }: B
             </div>
           )}
 
-          {/* Checkmark */}
+          {/* Checkmark - Cliquable pour toggle */}
           <div
+            onClick={handleCircleClick}
             className={cn(
-              'w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all',
+              'w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all cursor-pointer hover:scale-110',
               completed
                 ? 'bg-[var(--success)] border-[var(--success)] text-background-100'
-                : 'border-foreground-300'
+                : 'border-foreground-300 hover:border-primary'
             )}
           >
             {completed && <Check className="h-5 w-5" />}
@@ -103,9 +126,29 @@ export function DailyHabitCard({ habit, onToggleComplete, onOpen, className }: B
 // ========================================
 
 export function WeeklyHabitCard({ habit, onToggleComplete, onOpen, className }: BaseHabitCardProps) {
+  const [clickTimeout, setClickTimeout] = useState<NodeJS.Timeout | null>(null)
+  
   const streak = calculateStreak(habit)
   const colorClass = getHabitColorClass((habit.color || 'purple') as 'purple' | 'blue' | 'green' | 'orange' | 'pink' | 'teal', 'light')
   const weekDaysLabel = getWeekDaysLabels(habit.weekDays as number[] | null)
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    
+    if (clickTimeout) {
+      // Double-clic détecté
+      clearTimeout(clickTimeout)
+      setClickTimeout(null)
+      onToggleComplete()
+    } else {
+      // Premier clic, attendre le double-clic potentiel
+      const timeout = setTimeout(() => {
+        setClickTimeout(null)
+        onOpen()
+      }, 300)
+      setClickTimeout(timeout)
+    }
+  }
 
   // Calculer la progression de la semaine
   const today = new Date()
@@ -138,11 +181,7 @@ export function WeeklyHabitCard({ habit, onToggleComplete, onOpen, className }: 
   return (
     <Card
       className={cn('p-4 cursor-pointer transition-all hover:shadow-md hover:scale-[1.02]', colorClass, className)}
-      onClick={onOpen}
-      onDoubleClick={(e) => {
-        e.stopPropagation()
-        onToggleComplete()
-      }}
+      onClick={handleCardClick}
     >
       <div className="space-y-3">
         {/* Header */}
@@ -205,18 +244,34 @@ export function WeeklyHabitCard({ habit, onToggleComplete, onOpen, className }: 
 // ========================================
 
 export function MonthlyHabitCard({ habit, onToggleComplete, onOpen, className }: BaseHabitCardProps) {
+  const [clickTimeout, setClickTimeout] = useState<NodeJS.Timeout | null>(null)
+  
   const streak = calculateStreak(habit)
   const { current, goal, percentage } = getCompletionProgress(habit)
   const colorClass = getHabitColorClass((habit.color || 'purple') as 'purple' | 'blue' | 'green' | 'orange' | 'pink' | 'teal', 'light')
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    
+    if (clickTimeout) {
+      // Double-clic détecté
+      clearTimeout(clickTimeout)
+      setClickTimeout(null)
+      onToggleComplete()
+    } else {
+      // Premier clic, attendre le double-clic potentiel
+      const timeout = setTimeout(() => {
+        setClickTimeout(null)
+        onOpen()
+      }, 300)
+      setClickTimeout(timeout)
+    }
+  }
+
   return (
     <Card
       className={cn('p-4 cursor-pointer transition-all hover:shadow-md hover:scale-[1.02]', colorClass, className)}
-      onClick={onOpen}
-      onDoubleClick={(e) => {
-        e.stopPropagation()
-        onToggleComplete()
-      }}
+      onClick={handleCardClick}
     >
       <div className="space-y-3">
         {/* Header */}

@@ -347,9 +347,9 @@ export function HabitDetailContent({ habit, userId }: HabitDetailContentProps) {
           {completed ? 'Annuler aujourd\'hui' : 'Compléter aujourd\'hui'}
         </Button>
 
-        {/* Éditer (TODO: Implémenter plus tard) */}
+        {/* Éditer */}
         <Button
-          onClick={() => toast.info('Fonctionnalité à venir')}
+          onClick={() => router.push(`/habits/${habit.id}/edit`)}
           variant="outline"
           size="icon"
         >
