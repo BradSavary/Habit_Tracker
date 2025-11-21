@@ -1,6 +1,6 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { HabitCard } from '@/components/habits/HabitCard'
 import { HabitWithCompletions } from '@/lib/habits-utils'
@@ -26,10 +26,15 @@ interface DashboardContentProps {
 export function DashboardContent({ todayHabits, otherHabits, userId }: DashboardContentProps) {
   const router = useRouter()
   const [, startTransition] = useTransition()
+  const [loadingHabitId, setLoadingHabitId] = useState<string | null>(null)
 
   const handleToggleComplete = async (habitId: string, habitName: string) => {
+    setLoadingHabitId(habitId)
     startTransition(async () => {
       const result = await toggleHabitCompletion(habitId, userId)
+
+      // Toujours retirer le loading après la réponse
+      setLoadingHabitId(null)
 
       if (result.success) {
         if (result.completed) {
@@ -92,6 +97,7 @@ export function DashboardContent({ todayHabits, otherHabits, userId }: Dashboard
                 habit={habit}
                 onToggleComplete={() => handleToggleComplete(habit.id, habit.name)}
                 onOpen={() => handleOpenHabit(habit.id)}
+                isLoading={loadingHabitId === habit.id}
               />
             ))}
           </div>
@@ -122,6 +128,7 @@ export function DashboardContent({ todayHabits, otherHabits, userId }: Dashboard
                 habit={habit}
                 onToggleComplete={() => handleToggleComplete(habit.id, habit.name)}
                 onOpen={() => handleOpenHabit(habit.id)}
+                isLoading={loadingHabitId === habit.id}
               />
             ))}
           </div>

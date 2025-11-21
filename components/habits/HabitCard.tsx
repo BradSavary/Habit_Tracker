@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Flame, Check } from 'lucide-react'
+import { Flame, Check, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getHabitColorClass } from '@/lib/design-tokens'
 import {
@@ -29,13 +29,14 @@ interface BaseHabitCardProps {
   onToggleComplete: () => void
   onOpen: () => void
   className?: string
+  isLoading?: boolean
 }
 
 // ========================================
 // DAILY HABIT CARD
 // ========================================
 
-export function DailyHabitCard({ habit, onToggleComplete, onOpen, className }: BaseHabitCardProps) {
+export function DailyHabitCard({ habit, onToggleComplete, onOpen, className, isLoading = false }: BaseHabitCardProps) {
   const [clickTimeout, setClickTimeout] = useState<NodeJS.Timeout | null>(null)
   
   const streak = calculateStreak(habit)
@@ -44,11 +45,14 @@ export function DailyHabitCard({ habit, onToggleComplete, onOpen, className }: B
 
   const handleCircleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
+    if (isLoading) return // Ne pas permettre de cliquer pendant le chargement
     onToggleComplete()
   }
 
   const handleCardClick = (e: React.MouseEvent) => {
     e.stopPropagation()
+    
+    if (isLoading) return // Ne pas permettre de cliquer pendant le chargement
     
     if (clickTimeout) {
       // Double-clic détecté
@@ -107,13 +111,18 @@ export function DailyHabitCard({ habit, onToggleComplete, onOpen, className }: B
           <div
             onClick={handleCircleClick}
             className={cn(
-              'w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all cursor-pointer hover:scale-110',
+              'w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all',
+              isLoading ? 'cursor-wait' : 'cursor-pointer hover:scale-110',
               completed
                 ? 'bg-[var(--success)] border-[var(--success)] text-background-100'
                 : 'border-foreground-300 hover:border-primary'
             )}
           >
-            {completed && <Check className="h-5 w-5" />}
+            {isLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              completed && <Check className="h-5 w-5" />
+            )}
           </div>
         </div>
       </div>
@@ -125,7 +134,7 @@ export function DailyHabitCard({ habit, onToggleComplete, onOpen, className }: B
 // WEEKLY HABIT CARD
 // ========================================
 
-export function WeeklyHabitCard({ habit, onToggleComplete, onOpen, className }: BaseHabitCardProps) {
+export function WeeklyHabitCard({ habit, onToggleComplete, onOpen, className, isLoading = false }: BaseHabitCardProps) {
   const [clickTimeout, setClickTimeout] = useState<NodeJS.Timeout | null>(null)
   
   const streak = calculateStreak(habit)
@@ -134,6 +143,8 @@ export function WeeklyHabitCard({ habit, onToggleComplete, onOpen, className }: 
 
   const handleCardClick = (e: React.MouseEvent) => {
     e.stopPropagation()
+    
+    if (isLoading) return // Ne pas permettre de cliquer pendant le chargement
     
     if (clickTimeout) {
       // Double-clic détecté
@@ -230,7 +241,10 @@ export function WeeklyHabitCard({ habit, onToggleComplete, onOpen, className }: 
             <span className="text-foreground-500">
               {completedDays}/{targetDays} jours
             </span>
-            <span className="text-foreground-500">{Math.round(progressPercentage)}%</span>
+            <div className="flex items-center gap-1">
+              {isLoading && <Loader2 className="h-3 w-3 animate-spin text-foreground-400" />}
+              <span className="text-foreground-500">{Math.round(progressPercentage)}%</span>
+            </div>
           </div>
           <Progress value={progressPercentage} className="h-2" />
         </div>
@@ -243,7 +257,7 @@ export function WeeklyHabitCard({ habit, onToggleComplete, onOpen, className }: 
 // MONTHLY HABIT CARD
 // ========================================
 
-export function MonthlyHabitCard({ habit, onToggleComplete, onOpen, className }: BaseHabitCardProps) {
+export function MonthlyHabitCard({ habit, onToggleComplete, onOpen, className, isLoading = false }: BaseHabitCardProps) {
   const [clickTimeout, setClickTimeout] = useState<NodeJS.Timeout | null>(null)
   
   const streak = calculateStreak(habit)
@@ -252,6 +266,8 @@ export function MonthlyHabitCard({ habit, onToggleComplete, onOpen, className }:
 
   const handleCardClick = (e: React.MouseEvent) => {
     e.stopPropagation()
+    
+    if (isLoading) return // Ne pas permettre de cliquer pendant le chargement
     
     if (clickTimeout) {
       // Double-clic détecté
@@ -305,7 +321,10 @@ export function MonthlyHabitCard({ habit, onToggleComplete, onOpen, className }:
             <span className="text-foreground-500">
               {current}/{goal} fois ce mois
             </span>
-            <span className="text-foreground-500">{Math.round(percentage)}%</span>
+            <div className="flex items-center gap-1">
+              {isLoading && <Loader2 className="h-3 w-3 animate-spin text-foreground-400" />}
+              <span className="text-foreground-500">{Math.round(percentage)}%</span>
+            </div>
           </div>
           <Progress value={percentage} className="h-2" />
         </div>
