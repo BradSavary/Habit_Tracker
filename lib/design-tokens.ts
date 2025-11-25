@@ -121,17 +121,10 @@ export const CHART_COLORS = [
 // ========================================
 
 /**
- * Récupère les classes CSS pour une couleur d'habitude
+ * Récupère les classes CSS pour une couleur d'habitude (sans couleurs dynamiques)
  * @param color - Clé de couleur (purple, blue, etc.)
  * @param variant - 'solid' pour couleur pleine, 'light' pour background léger
- * @returns Classes Tailwind CSS
- * 
- * @example
- * ```tsx
- * <Badge className={getHabitColorClass('purple', 'solid')}>
- *   Santé
- * </Badge>
- * ```
+ * @returns Classes Tailwind CSS statiques
  */
 export function getHabitColorClass(
   color: HabitColorKey,
@@ -139,6 +132,40 @@ export function getHabitColorClass(
 ): string {
   const colorConfig = HABIT_COLORS[color];
   return variant === 'solid' ? colorConfig.class : colorConfig.lightClass;
+}
+
+/**
+ * Récupère le style inline pour une bordure colorée d'habitude
+ * @param color - Clé de couleur
+ * @returns Style React pour bordure gauche colorée
+ * 
+ * @example
+ * ```tsx
+ * <Card style={getHabitBorderStyle('purple')}>
+ *   Habitude
+ * </Card>
+ * ```
+ */
+export function getHabitBorderStyle(color: HabitColorKey): React.CSSProperties {
+  const colorConfig = HABIT_COLORS[color];
+  return {
+    borderLeftWidth: '4px',
+    borderLeftStyle: 'solid',
+    borderLeftColor: colorConfig.value,
+  };
+}
+
+/**
+ * Récupère le style inline pour un badge coloré d'habitude
+ * @param color - Clé de couleur
+ * @returns Style React pour badge (fond + texte)
+ */
+export function getHabitBadgeStyle(color: HabitColorKey): React.CSSProperties {
+  const colorConfig = HABIT_COLORS[color];
+  return {
+    backgroundColor: colorConfig.light,
+    color: colorConfig.value,
+  };
 }
 
 /**

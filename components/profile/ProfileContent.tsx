@@ -2,11 +2,13 @@
 
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { Trophy, Star, Lock, ChevronRight } from 'lucide-react'
+import { Trophy, Star, Lock, ChevronRight, LogOut } from 'lucide-react'
 import { getProgressionStats } from '@/lib/progression'
 import { EMOJI_REWARDS, countUnlockedEmojis } from '@/lib/emojis-system'
+import { logoutUser } from '@/lib/actions/auth'
 
 /**
  * ProfileContent - Contenu de la page profil
@@ -36,6 +38,10 @@ export function ProfileContent({ user, stats }: ProfileContentProps) {
   const progression = getProgressionStats(user.xp)
   const emojiStats = countUnlockedEmojis(user.level)
 
+  const handleSignOut = async () => {
+    await logoutUser()
+  }
+
   return (
     <div className="space-y-6">
       {/* Header avec nom et toggle thème */}
@@ -44,7 +50,17 @@ export function ProfileContent({ user, stats }: ProfileContentProps) {
           <h2 className="text-2xl font-bold text-foreground-800">{user.name}</h2>
           <p className="text-sm text-foreground-400">{user.email}</p>
         </div>
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={handleSignOut}
+            title="Se déconnecter"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Carte Niveau & XP - Cliquable */}

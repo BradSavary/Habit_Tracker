@@ -88,8 +88,11 @@ model Habit {
   color       String?  // Couleur accent (purple, blue, green, orange, pink, teal)
   icon        String?
   frequency   String   @default("daily") // daily, weekly, monthly
-  weekDays    Json?    // Pour weekly: [0,1,2,3,4,5,6] (dimanche à samedi)
+  weekDays    Json?    // Pour weekly: [0,1,2,3,4,5,6] (dimanche à samedi) - jours spécifiques
+  weeklyGoal  Int?     // Pour weekly: nombre de fois par semaine (si weekDays non spécifié)
   monthlyGoal Int?     // Pour monthly: nombre de fois dans le mois
+  monthDays   Json?    // Pour monthly: [4, 12, 25] - jours spécifiques du mois (1-31)
+  endDate     DateTime? // Date de fin / échéance de l'habitude
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())

@@ -19,6 +19,7 @@ export interface HabitWithCompletions {
   color?: string | null
   frequency: string
   weekDays?: Prisma.JsonValue // Json type de Prisma (peut être string, number[], null, etc.)
+  weeklyGoal?: number | null
   monthlyGoal?: number | null
   completions: HabitCompletion[]
 }
@@ -169,10 +170,49 @@ export function shouldShowToday(habit: HabitWithCompletions, today: Date = new D
     return true // Toujours afficher les habitudes quotidiennes
   }
 
-  if (habit.frequency === 'weekly' && habit.weekDays) {
-    const dayOfWeek = today.getDay()
-    const weekDays = habit.weekDays as number[]
-    return weekDays.includes(dayOfWeek)
+  if (habit.frequency === 'weekly') {
+    // Si l'habitude a des jours précis définis
+    if (habit.weekDays && Array.isArray(habit.weekDays) && habit.weekDays.length > 0) {
+      const dayOfWeek = today.getDay()
+      const weekDays = habit.weekDays as number[]
+      return weekDays.includes(dayOfWeek)
+    }
+    
+    // Si l'habitude n'a pas de jours précis (seulement weeklyGoal)
+    // L'afficher SAUF si elle est complétée à 100% sur la semaine (depuis le lendemain)
+    if (habit.weeklyGoal) {
+      const weekStart = getWeekStart(today)
+      const weekCompletions = habit.completions.filter((c) => {
+        const completionDate = new Date(c.completedAt)
+        return completionDate >= weekStart
+      })
+      
+      const completedCount = weekCompletions.length
+      const goal = habit.weeklyGoal
+      
+      // Si l'objectif n'est pas atteint, afficher
+      if (completedCount < goal) {
+        return true
+      }
+      
+      // Si l'objectif est atteint, vérifier si c'était hier ou avant
+      if (completedCount >= goal && weekCompletions.length > 0) {
+        const lastCompletion = weekCompletions.sort((a, b) => 
+          new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+        )[0]
+        
+        const lastCompletionDate = new Date(lastCompletion.completedAt)
+        lastCompletionDate.setHours(0, 0, 0, 0)
+        
+        const todayStart = new Date(today)
+        todayStart.setHours(0, 0, 0, 0)
+        
+        // Si la dernière complétion était hier ou avant, ne pas afficher
+        return lastCompletionDate.getTime() >= todayStart.getTime()
+      }
+    }
+    
+    return false
   }
 
   if (habit.frequency === 'monthly') {
