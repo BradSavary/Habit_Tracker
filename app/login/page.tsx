@@ -6,7 +6,8 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import Link from "next/link"
-import { Mail, Lock, CheckCircle2 } from "lucide-react"
+import { motion } from "framer-motion"
+import { Mail, Lock, CheckCircle2, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -61,19 +62,44 @@ function LoginForm() {
   return (
     <div className="min-h-screen bg-background-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        {/* Bouton retour */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+          className="mb-4"
+        >
+          <Link href="/">
+            <Button variant="ghost" size="sm" className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Retour
+            </Button>
+          </Link>
+        </motion.div>
+
         {/* Logo / Titre */}
-        <div className="text-center mb-8">
+        <motion.div 
+          className="text-center mb-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
           <h1 className="text-4xl font-bold text-foreground-800 mb-2">
-            Habit Tracker
+            Habibit Tracker
           </h1>
           <p className="text-foreground-400">
             Connectez-vous pour suivre vos habitudes
           </p>
-        </div>
+        </motion.div>
 
         {/* Messages de feedback */}
         {verified && (
-          <div className="mb-6 p-4 bg-[var(--success-light)] border border-[var(--success)] rounded-lg flex items-start gap-3">
+          <motion.div 
+            className="mb-6 p-4 bg-[var(--success-light)] border border-[var(--success)] rounded-lg flex items-start gap-3"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+          >
             <CheckCircle2 className="h-5 w-5 text-[var(--success)] mt-0.5 flex-shrink-0" />
             <div>
               <p className="text-sm font-medium text-foreground-700">
@@ -83,10 +109,15 @@ function LoginForm() {
                 Vous pouvez maintenant vous connecter à votre compte.
               </p>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Formulaire de connexion */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
         <Card className="bg-background-300 border-background-500 shadow-lg">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-foreground-800">
@@ -168,9 +199,15 @@ function LoginForm() {
             </form>
           </CardContent>
         </Card>
+        </motion.div>
 
         {/* Lien inscription */}
-        <p className="mt-6 text-center text-sm text-foreground-400">
+        <motion.p 
+          className="mt-6 text-center text-sm text-foreground-400"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.5 }}
+        >
           Pas encore de compte ?{" "}
           <Link
             href="/register"
@@ -178,7 +215,7 @@ function LoginForm() {
           >
             Créer un compte
           </Link>
-        </p>
+        </motion.p>
       </div>
     </div>
   )
