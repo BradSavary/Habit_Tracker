@@ -1,10 +1,19 @@
+'use client'
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { motion } from 'framer-motion'
 
 export function LandingCTA() {
   return (
     <section className="bg-background-300 py-20">
-      <div className="container mx-auto px-4 text-center">
+      <motion.div 
+        className="container mx-auto px-4 text-center"
+        initial={{ opacity: 0, scale: 0.95 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.5 }}
+      >
         <h2 className="text-3xl md:text-4xl font-bold text-foreground-900 mb-4">
           Prêt à transformer vos habitudes ?
         </h2>
@@ -16,7 +25,7 @@ export function LandingCTA() {
             Commencer maintenant - C&apos;est gratuit
           </Button>
         </Link>
-      </div>
+      </motion.div>
     </section>
   );
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import {
   Drawer,
@@ -147,7 +148,12 @@ export function MoodContent({ userId, initialMoods }: MoodContentProps) {
   return (
     <div className="space-y-6">
       {/* En-tête mois */}
-      <div className="flex items-center justify-between">
+      <motion.div 
+        className="flex items-center justify-between"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         <Button
           variant="ghost"
           size="icon"
@@ -169,28 +175,51 @@ export function MoodContent({ userId, initialMoods }: MoodContentProps) {
         >
           <ChevronRight className="h-6 w-6" />
         </Button>
-      </div>
+      </motion.div>
 
       {/* Légende */}
-      <div className="mb-4 p-3 bg-muted/30 rounded-lg border border-muted">
+      <motion.div 
+        className="mb-4 p-3 bg-muted/30 rounded-lg border border-muted"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+      >
         <p className="text-xs text-muted-foreground text-center">
           Seul le jour actuel (surligné) peut être modifié. Les autres jours sont grisés.
         </p>
-      </div>
+      </motion.div>
 
       {/* Calendrier */}
       <div className="space-y-4">
         {/* En-têtes des jours */}
-        <div className="grid grid-cols-7 gap-2 text-center">
+        <motion.div 
+          className="grid grid-cols-7 gap-2 text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+        >
           {DAYS_OF_WEEK.map((day) => (
             <div key={day} className="text-sm font-medium text-muted-foreground">
               {day}
             </div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Grille des jours */}
-        <div className="grid grid-cols-7 gap-2">
+        <motion.div 
+          className="grid grid-cols-7 gap-2"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: {
+              transition: {
+                staggerChildren: 0.02,
+                delayChildren: 0.3
+              }
+            }
+          }}
+        >
           {calendarDays.map((date, index) => {
             if (!date) {
               return <div key={`empty-${index}`} className="aspect-square" />
@@ -200,7 +229,7 @@ export function MoodContent({ userId, initialMoods }: MoodContentProps) {
             const isTodayDate = isToday(date)
 
             return (
-              <div
+              <motion.div
                 key={date.toISOString()}
                 className={`aspect-square relative flex flex-col items-center justify-center rounded-lg border ${
                   isTodayDate
@@ -209,6 +238,11 @@ export function MoodContent({ userId, initialMoods }: MoodContentProps) {
                     ? 'bg-card opacity-70'
                     : 'bg-muted/30 opacity-50'
                 }`}
+                variants={{
+                  hidden: { opacity: 0, scale: 0.8 },
+                  visible: { opacity: 1, scale: 1 }
+                }}
+                whileTap={isTodayDate ? { scale: 0.95 } : {}}
               >
                 {/* Numéro du jour */}
                 <span
@@ -257,10 +291,10 @@ export function MoodContent({ userId, initialMoods }: MoodContentProps) {
                   // Cercle vide grisé pour les autres jours (non cliquable)
                   <div className="w-8 h-8 rounded-full border border-muted/50" />
                 )}
-              </div>
+              </motion.div>
             )
           })}
-        </div>
+        </motion.div>
       </div>
 
       {/* Drawer pour sélectionner un emoji */}
