@@ -25,8 +25,11 @@ const habitSchema = z.object({
   ]).optional(),
   color: z.enum(['purple', 'blue', 'green', 'orange', 'pink', 'teal']).optional(),
   frequency: z.enum(['daily', 'weekly', 'monthly']).default('daily'),
-  weekDays: z.array(z.number().min(0).max(6)).optional(), // 0 = dimanche, 6 = samedi
+  weekDays: z.array(z.number().min(0).max(6)).optional(), // 0 = dimanche, 6 = samedi - jours spécifiques
+  weeklyGoal: z.number().min(1).max(7).optional(), // Nombre de fois par semaine
   monthlyGoal: z.number().min(1).max(31).optional(),
+  monthDays: z.array(z.number().min(1).max(31)).optional(), // Jours spécifiques du mois (1-31)
+  endDate: z.date().optional(), // Date de fin de l'habitude
 })
 
 const updateHabitSchema = habitSchema.extend({
@@ -56,6 +59,8 @@ export async function createHabit(data: CreateHabitInput) {
         ...validatedData,
         userId: data.userId,
         weekDays: validatedData.weekDays || undefined,
+        monthDays: validatedData.monthDays || undefined,
+        endDate: validatedData.endDate || undefined,
       },
     })
 

@@ -11,10 +11,14 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { HABIT_COLORS, HABIT_COLOR_KEYS } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
 import { EmojiPickerDrawer } from '@/components/habits/EmojiPickerDrawer'
-import { Check } from 'lucide-react'
+import { Check, Calendar as CalendarIcon, X } from 'lucide-react'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale'
 
 /**
  * EditHabitForm - Formulaire d'édition d'habitude
@@ -44,8 +48,11 @@ const editHabitSchema = z.object({
   ]),
   frequency: z.enum(['daily', 'weekly', 'monthly']),
   description: z.string().max(500, 'La description est trop longue').optional(),
+  endDate: z.date().optional(),
   weekDays: z.array(z.number().min(0).max(6)).optional(),
+  weeklyGoal: z.number().min(1).max(7).optional(),
   monthlyGoal: z.number().min(1).max(31).optional(),
+  monthDays: z.array(z.number().min(1).max(31)).optional(),
 })
 
 type EditHabitFormData = z.infer<typeof editHabitSchema>
@@ -75,6 +82,15 @@ export function EditHabitForm({ habit, userId }: EditHabitFormProps) {
   const [selectedDays, setSelectedDays] = useState<number[]>(
     (habit.weekDays as number[] | null) || []
   )
+  const [selectedMonthDays, setSelectedMonthDays] = useState<number[]>(
+    (habit.monthDays as number[] | null) || []
+  )
+  const [useSpecificWeekDays, setUseSpecificWeekDays] = useState(
+    !!habit.weekDays && (habit.weekDays as number[]).length > 0
+  )
+  const [useSpecificMonthDays, setUseSpecificMonthDays] = useState(
+    !!habit.monthDays && (habit.monthDays as number[]).length > 0
+  )
 
   const {
     register,
@@ -91,14 +107,18 @@ export function EditHabitForm({ habit, userId }: EditHabitFormProps) {
       category: (habit.category as EditHabitFormData['category']) || 'Santé',
       frequency: habit.frequency as EditHabitFormData['frequency'],
       description: habit.description || '',
+      endDate: habit.endDate ? new Date(habit.endDate) : undefined,
       weekDays: (habit.weekDays as number[] | null) || undefined,
+      weeklyGoal: habit.weeklyGoal || undefined,
       monthlyGoal: habit.monthlyGoal || undefined,
+      monthDays: (habit.monthDays as number[] | null) || undefined,
     },
   })
 
   const selectedEmoji = watch('emoji')
   const selectedColor = watch('color')
   const selectedFrequency = watch('frequency')
+  const endDate = watch('endDate')
 
   // Initialiser weekDays si weekly
   useEffect(() => {
@@ -123,17 +143,44 @@ export function EditHabitForm({ habit, userId }: EditHabitFormProps) {
     })
   }
 
+  // Toggle jour du mois
+  const toggleMonthDay = (day: number) => {
+    setSelectedMonthDays((prev) => {
+      if (prev.includes(day)) {
+        const newDays = prev.filter((d) => d !== day)
+        setValue('monthDays', newDays)
+        return newDays
+      } else {
+        const newDays = [...prev, day].sort((a, b) => a - b)
+        setValue('monthDays', newDays)
+        return newDays
+      }
+    })
+  }
+
   const onSubmit = (data: EditHabitFormData) => {
     // Validation custom pour weekly
-    if (data.frequency === 'weekly' && (!data.weekDays || data.weekDays.length === 0)) {
-      toast.error('Sélectionnez au moins un jour de la semaine')
-      return
+    if (data.frequency === 'weekly') {
+      if (useSpecificWeekDays && (!data.weekDays || data.weekDays.length === 0)) {
+        toast.error('Sélectionnez au moins un jour de la semaine')
+        return
+      }
+      if (!useSpecificWeekDays && !data.weeklyGoal) {
+        toast.error('Définissez un nombre de fois par semaine')
+        return
+      }
     }
 
     // Validation pour monthly
-    if (data.frequency === 'monthly' && !data.monthlyGoal) {
-      toast.error('Définissez un objectif mensuel')
-      return
+    if (data.frequency === 'monthly') {
+      if (!data.monthlyGoal) {
+        toast.error('Définissez un objectif mensuel')
+        return
+      }
+      if (useSpecificMonthDays && (!data.monthDays || data.monthDays.length === 0)) {
+        toast.error('Sélectionnez au moins un jour du mois')
+        return
+      }
     }
 
     startTransition(async () => {
