@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { HabitCard } from '@/components/habits/HabitCard'
 import { HabitWithCompletions } from '@/lib/habits-utils'
 import { toggleHabitCompletion } from '@/lib/actions/habits'
@@ -80,7 +81,11 @@ export function DashboardContent({ todayHabits, otherHabits, userId }: Dashboard
     <div className="space-y-6">
       {/* Section: Aujourd'hui */}
       {todayHabits.length > 0 && (
-        <section>
+        <motion.section
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
           <div className="mb-4">
             <h2 className="text-xl font-bold text-foreground-800">
               Aujourd&apos;hui
@@ -90,18 +95,38 @@ export function DashboardContent({ todayHabits, otherHabits, userId }: Dashboard
             </p>
           </div>
 
-          <div className="space-y-3">
-            {todayHabits.map((habit) => (
-              <HabitCard
+          <motion.div 
+            className="space-y-3"
+            variants={{
+              hidden: { opacity: 0 },
+              show: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.1
+                }
+              }
+            }}
+            initial="hidden"
+            animate="show"
+          >
+            {todayHabits.map((habit, index) => (
+              <motion.div
                 key={habit.id}
-                habit={habit}
-                onToggleComplete={() => handleToggleComplete(habit.id, habit.name)}
-                onOpen={() => handleOpenHabit(habit.id)}
-                isLoading={loadingHabitId === habit.id}
-              />
+                variants={{
+                  hidden: { opacity: 0, x: -20 },
+                  show: { opacity: 1, x: 0 }
+                }}
+              >
+                <HabitCard
+                  habit={habit}
+                  onToggleComplete={() => handleToggleComplete(habit.id, habit.name)}
+                  onOpen={() => handleOpenHabit(habit.id)}
+                  isLoading={loadingHabitId === habit.id}
+                />
+              </motion.div>
             ))}
-          </div>
-        </section>
+          </motion.div>
+        </motion.section>
       )}
 
       {/* Separator si les deux sections existent */}
@@ -111,7 +136,11 @@ export function DashboardContent({ todayHabits, otherHabits, userId }: Dashboard
 
       {/* Section: Autres habitudes */}
       {otherHabits.length > 0 && (
-        <section>
+        <motion.section
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+        >
           <div className="mb-4">
             <h2 className="text-xl font-bold text-foreground-800">
               Autres habitudes
@@ -121,31 +150,62 @@ export function DashboardContent({ todayHabits, otherHabits, userId }: Dashboard
             </p>
           </div>
 
-          <div className="space-y-3">
-            {otherHabits.map((habit) => (
-              <HabitCard
+          <motion.div 
+            className="space-y-3"
+            variants={{
+              hidden: { opacity: 0 },
+              show: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.1
+                }
+              }
+            }}
+            initial="hidden"
+            animate="show"
+          >
+            {otherHabits.map((habit, index) => (
+              <motion.div
                 key={habit.id}
-                habit={habit}
-                onToggleComplete={() => handleToggleComplete(habit.id, habit.name)}
-                onOpen={() => handleOpenHabit(habit.id)}
-                isLoading={loadingHabitId === habit.id}
-              />
+                variants={{
+                  hidden: { opacity: 0, x: -20 },
+                  show: { opacity: 1, x: 0 }
+                }}
+              >
+                <HabitCard
+                  habit={habit}
+                  onToggleComplete={() => handleToggleComplete(habit.id, habit.name)}
+                  onOpen={() => handleOpenHabit(habit.id)}
+                  isLoading={loadingHabitId === habit.id}
+                />
+              </motion.div>
             ))}
-          </div>
-        </section>
+          </motion.div>
+        </motion.section>
       )}
 
       {/* Empty state */}
       {todayHabits.length === 0 && otherHabits.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="text-6xl mb-4">🎯</div>
+        <motion.div 
+          className="flex flex-col items-center justify-center py-12 text-center"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+        >
+          <motion.div 
+            className="text-6xl mb-4"
+            animate={{ rotate: [0, -10, 10, -10, 10, 0] }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            🎯
+          </motion.div>
           <h3 className="text-xl font-semibold text-foreground-700 mb-2">
             Aucune habitude pour le moment
           </h3>
           <p className="text-foreground-400 mb-6">
             Créez votre première habitude pour commencer !
           </p>
-        </div>
+        </motion.div>
       )}
     </div>
   )

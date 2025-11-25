@@ -3,7 +3,7 @@
 import { z } from "zod"
 import { hash } from "bcryptjs"
 import prisma from "@/lib/prisma"
-import { signIn } from "@/lib/auth"
+import { signIn, signOut } from "@/lib/auth"
 
 // Schémas de validation
 const registerSchema = z.object({
@@ -149,3 +149,9 @@ export async function loginUser(
   }
 }
 
+/**
+ * Server Action pour la déconnexion
+ */
+export async function logoutUser(): Promise<void> {
+  await signOut({ redirectTo: "/login" })
+}
