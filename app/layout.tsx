@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Habit Tracker - Suivez vos habitudes",
+  title: "Habibit Tracker - Suivez vos habitudes",
   description: "Créez et suivez vos habitudes quotidiennes pour atteindre vos objectifs",
 };
 

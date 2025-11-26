@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Trophy, Lock, Check, TrendingUp } from 'lucide-react'
 import { getProgressionStats, getXpForNextLevel } from '@/lib/progression'
 import { getEmojiForLevel } from '@/lib/emojis-system'
+import { motion } from 'framer-motion'
 
 /**
  * ProgressionContent - Affichage vertical de la progression
@@ -45,7 +46,12 @@ export function ProgressionContent({ level, xp }: ProgressionContentProps) {
   return (
     <div className="space-y-6">
       {/* Résumé compact en haut */}
-      <Card className="z-20 p-4 sticky top-20 bg-background-100/95 backdrop-blur-sm">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <Card className="z-20 p-4 sticky top-20 bg-background-100/95 backdrop-blur-sm">
         <div className="flex items-center justify-between gap-4">
           {/* Niveau */}
           <div className="flex items-center gap-3">
@@ -73,6 +79,7 @@ export function ProgressionContent({ level, xp }: ProgressionContentProps) {
           )}
         </div>
       </Card>
+      </motion.div>
 
       {/* Timeline de progression verticale */}
       <div className="relative">
@@ -81,17 +88,21 @@ export function ProgressionContent({ level, xp }: ProgressionContentProps) {
 
         {/* Niveaux */}
         <div className="space-y-0">
-          {levels.map((targetLevel) => {
+          {levels.map((targetLevel, index) => {
             const status = getLevelStatus(targetLevel)
             const emojiReward = getEmojiForLevel(targetLevel)
             const xpForThisLevel = getXpForNextLevel(targetLevel - 1)
             const isCurrentLevel = targetLevel === level
 
             return (
-              <div
+              <motion.div
                 key={targetLevel}
                 ref={isCurrentLevel ? currentLevelRef : null}
                 className="relative flex items-start gap-4 pb-8"
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.3 }}
               >
                 {/* Point sur la ligne */}
                 <div
@@ -172,7 +183,7 @@ export function ProgressionContent({ level, xp }: ProgressionContentProps) {
                     )}
                   </div>
                 </Card>
-              </div>
+              </motion.div>
             )
           })}
         </div>

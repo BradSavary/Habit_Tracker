@@ -6,7 +6,8 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import Link from "next/link"
-import { User, Mail, Lock, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react"
+import { motion } from "framer-motion"
+import { User, Mail, Lock, AlertCircle, CheckCircle2, Eye, EyeOff, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -101,7 +102,28 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background-100 px-4 py-8">
-      <Card className="w-full max-w-md bg-background-300 border-background-500">
+      <div className="w-full max-w-md">
+        {/* Bouton retour */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+          className="mb-4"
+        >
+          <Link href="/">
+            <Button variant="ghost" size="sm" className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Retour
+            </Button>
+          </Link>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
+      <Card className="w-full bg-background-300 border-background-500">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-3xl font-bold text-foreground-900">
             Créer un compte
@@ -271,17 +293,10 @@ export default function RegisterPage() {
               </Link>
             </p>
           </div>
-
-          {/* Lien retour accueil */}
-          <div className="mt-4">
-            <Link href="/">
-              <Button variant="outline" className="w-full border-background-500 text-foreground-700 hover:bg-background-400">
-                Retour à l&apos;accueil
-              </Button>
-            </Link>
-          </div>
         </CardContent>
       </Card>
+      </motion.div>
+      </div>
     </div>
   )
 }

@@ -21,7 +21,7 @@ export function LandingNav() {
         {/* Logo */}
         <div className="flex items-center gap-2">
           <Target className="h-6 w-6 text-foreground-800" />
-          <span className="text-xl font-bold text-foreground-800">HabitTracker</span>
+          <span className="text-xl font-bold text-foreground-800">HabibitTracker</span>
         </div>
 
         {/* Desktop Navigation */}

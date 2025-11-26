@@ -9,6 +9,7 @@ import { Trophy, Star, Lock, ChevronRight, LogOut } from 'lucide-react'
 import { getProgressionStats } from '@/lib/progression'
 import { EMOJI_REWARDS, countUnlockedEmojis } from '@/lib/emojis-system'
 import { logoutUser } from '@/lib/actions/auth'
+import { motion } from 'framer-motion'
 
 /**
  * ProfileContent - Contenu de la page profil
@@ -39,13 +40,28 @@ export function ProfileContent({ user, stats }: ProfileContentProps) {
   const emojiStats = countUnlockedEmojis(user.level)
 
   const handleSignOut = async () => {
-    await logoutUser()
+    try {
+      await logoutUser()
+      // Redirection côté client pour éviter les problèmes de localhost
+      router.push('/login')
+      router.refresh()
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error)
+      // Forcer la redirection même en cas d'erreur
+      router.push('/login')
+      router.refresh()
+    }
   }
 
   return (
     <div className="space-y-6">
       {/* Header avec nom et toggle thème */}
-      <div className="flex items-center justify-between">
+      <motion.div 
+        className="flex items-center justify-between"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         <div>
           <h2 className="text-2xl font-bold text-foreground-800">{user.name}</h2>
           <p className="text-sm text-foreground-400">{user.email}</p>
@@ -61,13 +77,19 @@ export function ProfileContent({ user, stats }: ProfileContentProps) {
             <LogOut className="h-4 w-4" />
           </Button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Carte Niveau & XP - Cliquable */}
-      <Card 
-        className="p-6 space-y-4 cursor-pointer hover:bg-background-400 transition-colors"
-        onClick={() => router.push('/profile/progression')}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+        whileTap={{ scale: 0.98 }}
       >
+        <Card 
+          className="p-6 space-y-4 cursor-pointer hover:bg-background-400 transition-colors"
+          onClick={() => router.push('/profile/progression')}
+        >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-full bg-primary/10">
@@ -112,9 +134,15 @@ export function ProfileContent({ user, stats }: ProfileContentProps) {
           </div>
         )}
       </Card>
+      </motion.div>
 
       {/* Statistiques Habitudes */}
-      <Card className="p-6 space-y-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+      >
+        <Card className="p-6 space-y-4">
         <h3 className="font-semibold text-foreground-800">Mes habitudes</h3>
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center">
@@ -131,9 +159,15 @@ export function ProfileContent({ user, stats }: ProfileContentProps) {
           </div>
         </div>
       </Card>
+      </motion.div>
 
       {/* Galerie d'emojis débloqués + 5 prochains */}
-      <Card className="p-6 space-y-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
+      >
+        <Card className="p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Star className="h-5 w-5 text-primary" />
@@ -147,13 +181,26 @@ export function ProfileContent({ user, stats }: ProfileContentProps) {
         <Progress value={emojiStats.percentage} className="h-2" />
 
         {/* Grille d'emojis - tous les 50 emojis avec 3 états: débloqués, 5 prochains en grisé, reste locked */}
-        <div className="grid grid-cols-6 gap-3">
+        <motion.div 
+          className="grid grid-cols-6 gap-3"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: {
+              transition: {
+                staggerChildren: 0.02,
+                delayChildren: 0.4
+              }
+            }
+          }}
+        >
           {EMOJI_REWARDS.map((reward) => {
             const isUnlocked = reward.level <= user.level
             const isNextReward = !isUnlocked && reward.level <= user.level + 5
 
             return (
-              <div
+              <motion.div
                 key={reward.emoji}
                 className={`relative flex flex-col items-center justify-center p-3 rounded-lg border ${
                   isUnlocked
@@ -163,6 +210,11 @@ export function ProfileContent({ user, stats }: ProfileContentProps) {
                     : 'border-muted/50 bg-muted/20 opacity-50'
                 }`}
                 title={isUnlocked ? reward.name : `Niveau ${reward.level} requis`}
+                variants={{
+                  hidden: { opacity: 0, scale: 0.8 },
+                  visible: { opacity: 1, scale: 1 }
+                }}
+                whileTap={isUnlocked ? { scale: 1.1 } : {}}
               >
                 {isUnlocked ? (
                   <>
@@ -202,11 +254,12 @@ export function ProfileContent({ user, stats }: ProfileContentProps) {
                     </span>
                   </>
                 )}
-              </div>
+              </motion.div>
             )
           })}
-        </div>
+        </motion.div>
       </Card>
+      </motion.div>
     </div>
   )
 }
