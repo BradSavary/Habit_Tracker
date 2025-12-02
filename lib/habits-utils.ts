@@ -240,7 +240,15 @@ export function getCompletionProgress(habit: HabitWithCompletions): {
   goal: number
   percentage: number
 } {
-  if (habit.frequency !== 'monthly' || !habit.monthlyGoal) {
+  if (habit.frequency !== 'monthly') {
+    return { current: 0, goal: 0, percentage: 0 }
+  }
+
+  // Vérifier si l'habitude a des jours précis
+  const hasSpecificDays = habit.monthDays && Array.isArray(habit.monthDays) && habit.monthDays.length > 0
+
+  // Si pas de jours précis et pas de goal, retourner 0
+  if (!hasSpecificDays && !habit.monthlyGoal) {
     return { current: 0, goal: 0, percentage: 0 }
   }
 
@@ -248,14 +256,32 @@ export function getCompletionProgress(habit: HabitWithCompletions): {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
   startOfMonth.setHours(0, 0, 0, 0)
 
-  const completionsThisMonth = habit.completions.filter((completion) => {
+  let completionsThisMonth = habit.completions.filter((completion) => {
     const completionDate = new Date(completion.completedAt)
     return completionDate >= startOfMonth
   })
 
-  const current = completionsThisMonth.length
-  const goal = habit.monthlyGoal
-  const percentage = Math.min((current / goal) * 100, 100)
+  // Si jours précis, filtrer les complétions sur ces jours uniquement
+  if (hasSpecificDays) {
+    completionsThisMonth = completionsThisMonth.filter((c) => {
+      const completionDate = new Date(c.completedAt)
+      const dayOfMonth = completionDate.getDate()
+      return (habit.monthDays as number[]).includes(dayOfMonth)
+    })
+  }
+
+  // Compter les jours uniques complétés
+  const uniqueCompletedDays = new Set(
+    completionsThisMonth.map(c => {
+      const d = new Date(c.completedAt)
+      d.setHours(0, 0, 0, 0)
+      return d.toISOString()
+    })
+  ).size
+
+  const current = uniqueCompletedDays
+  const goal = hasSpecificDays ? (habit.monthDays as number[]).length : (habit.monthlyGoal || 0)
+  const percentage = goal > 0 ? Math.min((current / goal) * 100, 100) : 0
 
   return { current, goal, percentage }
 }

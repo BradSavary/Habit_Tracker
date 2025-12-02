@@ -247,6 +247,19 @@ export async function toggleHabitCompletion(habitId: string, userId: string, dat
       }
     }
 
+    // Pour les habitudes mensuelles avec jours précis, vérifier que le jour actuel est dans monthDays
+    if (habit.frequency === 'monthly' && habit.monthDays) {
+      const currentDayOfMonth = today.getDate() // 1-31
+      const monthDaysArray = habit.monthDays as number[] // Cast JSON to number[]
+      
+      if (!monthDaysArray.includes(currentDayOfMonth)) {
+        return { 
+          success: false, 
+          error: `Cette habitude ne peut être complétée que les ${monthDaysArray.sort((a, b) => a - b).join(', ')} du mois` 
+        }
+      }
+    }
+
     // Vérifier si l'XP a déjà été accordé aujourd'hui pour cette habitude
     const existingXpGrant = await prisma.habitXpGrant.findUnique({
       where: {
