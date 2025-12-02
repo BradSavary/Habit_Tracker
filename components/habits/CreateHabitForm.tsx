@@ -149,12 +149,12 @@ export function CreateHabitForm({ userId, userLevel }: CreateHabitFormProps) {
 
     // Validation pour monthly
     if (data.frequency === 'monthly') {
-      if (!data.monthlyGoal) {
-        toast.error('Définissez un objectif mensuel')
-        return
-      }
       if (useSpecificMonthDays && (!data.monthDays || data.monthDays.length === 0)) {
         toast.error('Sélectionnez au moins un jour du mois')
+        return
+      }
+      if (!useSpecificMonthDays && !data.monthlyGoal) {
+        toast.error('Définissez un objectif mensuel')
         return
       }
     }
@@ -359,22 +359,24 @@ export function CreateHabitForm({ userId, userLevel }: CreateHabitFormProps) {
       {/* Monthly: Configuration */}
       {selectedFrequency === 'monthly' && (
         <div className="space-y-4">
-          {/* Objectif mensuel (toujours requis) */}
-          <div className="space-y-2">
-            <Label htmlFor="monthlyGoal">Objectif mensuel *</Label>
-            <Input
-              id="monthlyGoal"
-              type="number"
-              min="1"
-              max="31"
-              placeholder="Ex: 20 fois par mois"
-              {...register('monthlyGoal', { valueAsNumber: true })}
-              className={errors.monthlyGoal ? 'border-[var(--error)]' : ''}
-            />
-            {errors.monthlyGoal && (
-              <p className="text-sm text-[var(--error)]">{errors.monthlyGoal.message}</p>
-            )}
-          </div>
+          {/* Objectif mensuel (seulement si pas de jours précis) */}
+          {!useSpecificMonthDays && (
+            <div className="space-y-2">
+              <Label htmlFor="monthlyGoal">Objectif mensuel *</Label>
+              <Input
+                id="monthlyGoal"
+                type="number"
+                min="1"
+                max="31"
+                placeholder="Ex: 20 fois par mois"
+                {...register('monthlyGoal', { valueAsNumber: true })}
+                className={errors.monthlyGoal ? 'border-[var(--error)]' : ''}
+              />
+              {errors.monthlyGoal && (
+                <p className="text-sm text-[var(--error)]">{errors.monthlyGoal.message}</p>
+              )}
+            </div>
+          )}
 
           {/* Toggle vers jours spécifiques */}
           <div className="space-y-2">
@@ -385,6 +387,12 @@ export function CreateHabitForm({ userId, userLevel }: CreateHabitFormProps) {
               onClick={() => {
                 setUseSpecificMonthDays(!useSpecificMonthDays)
                 if (!useSpecificMonthDays) {
+                  // Activer jours précis : réinitialiser monthlyGoal
+                  setSelectedMonthDays([])
+                  setValue('monthDays', undefined)
+                  setValue('monthlyGoal', undefined)
+                } else {
+                  // Désactiver jours précis : réinitialiser monthDays
                   setSelectedMonthDays([])
                   setValue('monthDays', undefined)
                 }

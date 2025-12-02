@@ -38,6 +38,9 @@ export function DashboardContent({ todayHabits, otherHabits, userId }: Dashboard
       setLoadingHabitId(null)
 
       if (result.success) {
+        // Forcer le refresh des données du serveur
+        router.refresh()
+
         if (result.completed) {
           // Vérifier si level up
           if (result.levelUp) {

@@ -21,6 +21,7 @@ export interface HabitWithCompletions {
   weekDays?: Prisma.JsonValue // Json type de Prisma (peut être string, number[], null, etc.)
   weeklyGoal?: number | null
   monthlyGoal?: number | null
+  monthDays?: Prisma.JsonValue // Json type de Prisma pour les jours du mois (1-31)
   completions: HabitCompletion[]
 }
 
@@ -216,7 +217,16 @@ export function shouldShowToday(habit: HabitWithCompletions, today: Date = new D
   }
 
   if (habit.frequency === 'monthly') {
-    return true // Afficher toujours (on vérifie le goal dans le mois)
+    // Si l'habitude a des jours précis définis
+    if (habit.monthDays && Array.isArray(habit.monthDays) && habit.monthDays.length > 0) {
+      const dayOfMonth = today.getDate() // 1-31
+      const monthDays = habit.monthDays as number[]
+      return monthDays.includes(dayOfMonth)
+    }
+    
+    // Si l'habitude n'a pas de jours précis (seulement monthlyGoal)
+    // L'afficher toujours
+    return true
   }
 
   return true // Par défaut, afficher
