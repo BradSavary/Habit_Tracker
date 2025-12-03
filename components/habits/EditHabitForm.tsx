@@ -11,14 +11,10 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { HABIT_COLORS, HABIT_COLOR_KEYS } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
 import { EmojiPickerDrawer } from '@/components/habits/EmojiPickerDrawer'
-import { Check, Calendar as CalendarIcon, X } from 'lucide-react'
-import { format } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import { Check } from 'lucide-react'
 
 /**
  * EditHabitForm - Formulaire d'édition d'habitude
@@ -82,13 +78,13 @@ export function EditHabitForm({ habit, userId }: EditHabitFormProps) {
   const [selectedDays, setSelectedDays] = useState<number[]>(
     (habit.weekDays as number[] | null) || []
   )
-  const [selectedMonthDays, setSelectedMonthDays] = useState<number[]>(
+  const [, setSelectedMonthDays] = useState<number[]>(
     (habit.monthDays as number[] | null) || []
   )
-  const [useSpecificWeekDays, setUseSpecificWeekDays] = useState(
+  const [useSpecificWeekDays] = useState(
     !!habit.weekDays && (habit.weekDays as number[]).length > 0
   )
-  const [useSpecificMonthDays, setUseSpecificMonthDays] = useState(
+  const [useSpecificMonthDays] = useState(
     !!habit.monthDays && (habit.monthDays as number[]).length > 0
   )
 
@@ -118,7 +114,6 @@ export function EditHabitForm({ habit, userId }: EditHabitFormProps) {
   const selectedEmoji = watch('emoji')
   const selectedColor = watch('color')
   const selectedFrequency = watch('frequency')
-  const endDate = watch('endDate')
 
   // Initialiser weekDays si weekly
   useEffect(() => {
@@ -138,21 +133,6 @@ export function EditHabitForm({ habit, userId }: EditHabitFormProps) {
       } else {
         const newDays = [...prev, day]
         setValue('weekDays', newDays)
-        return newDays
-      }
-    })
-  }
-
-  // Toggle jour du mois
-  const toggleMonthDay = (day: number) => {
-    setSelectedMonthDays((prev) => {
-      if (prev.includes(day)) {
-        const newDays = prev.filter((d) => d !== day)
-        setValue('monthDays', newDays)
-        return newDays
-      } else {
-        const newDays = [...prev, day].sort((a, b) => a - b)
-        setValue('monthDays', newDays)
         return newDays
       }
     })

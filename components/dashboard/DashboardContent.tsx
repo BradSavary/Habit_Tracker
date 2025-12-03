@@ -112,7 +112,7 @@ export function DashboardContent({ todayHabits, otherHabits, userId }: Dashboard
             initial="hidden"
             animate="show"
           >
-            {todayHabits.map((habit, index) => (
+            {todayHabits.map((habit) => (
               <motion.div
                 key={habit.id}
                 variants={{
@@ -167,7 +167,7 @@ export function DashboardContent({ todayHabits, otherHabits, userId }: Dashboard
             initial="hidden"
             animate="show"
           >
-            {otherHabits.map((habit, index) => (
+            {otherHabits.map((habit) => (
               <motion.div
                 key={habit.id}
                 variants={{

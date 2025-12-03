@@ -12,7 +12,6 @@ import {
   HabitWithCompletions,
   calculateStreak,
   isCompletedToday,
-  getCompletionProgress,
   getWeekDaysLabels,
 } from '@/lib/habits-utils'
 
@@ -413,7 +412,6 @@ export function MonthlyHabitCard({ habit, onToggleComplete, onOpen, className, i
   const streak = calculateStreak(habit)
   const habitColor = (habit.color || 'purple') as 'purple' | 'blue' | 'green' | 'orange' | 'pink' | 'teal'
   const borderStyle = getHabitBorderStyle(habitColor)
-  const badgeStyle = getHabitBadgeStyle(habitColor)
 
   // Vérifier si l'habitude a des jours précis définis
   const hasSpecificDays = habit.monthDays && Array.isArray(habit.monthDays) && habit.monthDays.length > 0

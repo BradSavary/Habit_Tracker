@@ -44,7 +44,7 @@ export function MoodContent({ userId, initialMoods }: MoodContentProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [isPending, startTransition] = useTransition()
   const [moods, setMoods] = useState<MoodEntry[]>(initialMoods)
-  const [isLoading, setIsLoading] = useState(false)
+  const [, setIsLoading] = useState(false)
 
   // Charger les moods du mois quand currentDate change
   useEffect(() => {

@@ -2,9 +2,8 @@
 
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
 import dynamic from 'next/dynamic'
-import { TrendingUp, TrendingDown, Flame, Calendar, Target, Award } from 'lucide-react'
+import { Flame, Award } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 // Import dynamique d'ApexCharts (client-side only)
@@ -48,7 +47,6 @@ export function StatsContent({
   stats,
   weeklyData,
   monthlyTrend,
-  frequencyData,
   topHabits,
   bestDay,
 }: StatsContentProps) {
