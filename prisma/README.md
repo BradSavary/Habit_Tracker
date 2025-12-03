@@ -64,16 +64,33 @@ prisma.config.ts       # Configuration Prisma
 
 ### User
 - Modèle pour l'authentification des utilisateurs
-- Relations : Un utilisateur peut avoir plusieurs habitudes
+- Champs de progression : `level`, `xp`, `unlockedEmojis`
+- Relations : habits, moodEntries, accounts, sessions
 
 ### Habit
 - Modèle pour les habitudes
-- Champs : name, description, color, icon, frequency
+- Champs : name, description, emoji, color, category, frequency
+- Configuration avancée : weekDays, weeklyGoal, monthlyGoal, monthDays, endDate
 - Relations : Appartient à un utilisateur, a plusieurs completions
 
 ### HabitCompletion
 - Modèle pour suivre les validations d'habitudes
+- Champs : habitId, completedAt, notes, createdAt
 - Relations : Appartient à une habitude
+
+### HabitXpGrant
+- Modèle pour tracker les XP accordés (ne se supprime jamais)
+- Empêche de donner de l'XP plusieurs fois par jour
+- Champs : habitId, userId, xpGranted, grantedDate
+
+### MoodEntry
+- Modèle pour le suivi de l'humeur quotidienne
+- Champs : emoji, date, notes
+- Relations : Appartient à un utilisateur
+
+### Account, Session, VerificationToken
+- Modèles NextAuth.js pour l'authentification
+- Gérés automatiquement par le PrismaAdapter
 
 ## 💡 Utilisation dans le code
 
