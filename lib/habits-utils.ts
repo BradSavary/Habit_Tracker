@@ -301,12 +301,124 @@ export function getWeekDaysLabels(weekDays: number[] | null | undefined): string
 }
 
 /**
- * Grouper les habitudes : Aujourd'hui vs Autres
+ * Vérifier si une habitude hebdo/mensuelle a atteint 100% et la dernière complétion date d'au moins hier
+ * Retourne toujours false pour les habitudes quotidiennes
+ */
+export function isFullyCompletedSinceYesterday(habit: HabitWithCompletions, today: Date = new Date()): boolean {
+  // Les habitudes quotidiennes ne peuvent jamais être dans cette catégorie
+  if (habit.frequency === 'daily') {
+    return false
+  }
+
+  const todayStart = new Date(today)
+  todayStart.setHours(0, 0, 0, 0)
+
+  if (habit.frequency === 'weekly') {
+    // Vérifier si l'habitude a un objectif hebdomadaire
+    if (!habit.weeklyGoal) {
+      return false
+    }
+
+    const weekStart = getWeekStart(today)
+    const weekCompletions = habit.completions.filter((c) => {
+      const completionDate = new Date(c.completedAt)
+      return completionDate >= weekStart
+    })
+
+    // Vérifier si l'objectif est atteint
+    if (weekCompletions.length < habit.weeklyGoal) {
+      return false
+    }
+
+    // Vérifier que la dernière complétion date d'au moins hier
+    const sortedCompletions = [...weekCompletions].sort(
+      (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+    )
+
+    if (sortedCompletions.length === 0) {
+      return false
+    }
+
+    const lastCompletionDate = new Date(sortedCompletions[0].completedAt)
+    lastCompletionDate.setHours(0, 0, 0, 0)
+
+    // La dernière complétion doit être strictement avant aujourd'hui
+    return lastCompletionDate.getTime() < todayStart.getTime()
+  }
+
+  if (habit.frequency === 'monthly') {
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
+    monthStart.setHours(0, 0, 0, 0)
+
+    const hasSpecificDays = habit.monthDays && Array.isArray(habit.monthDays) && habit.monthDays.length > 0
+
+    // Si pas de jours précis et pas de goal, retourner false
+    if (!hasSpecificDays && !habit.monthlyGoal) {
+      return false
+    }
+
+    let monthCompletions = habit.completions.filter((c) => {
+      const completionDate = new Date(c.completedAt)
+      return completionDate >= monthStart
+    })
+
+    // Si jours précis, filtrer les complétions sur ces jours uniquement
+    if (hasSpecificDays) {
+      monthCompletions = monthCompletions.filter((c) => {
+        const completionDate = new Date(c.completedAt)
+        const dayOfMonth = completionDate.getDate()
+        return (habit.monthDays as number[]).includes(dayOfMonth)
+      })
+    }
+
+    // Compter les jours uniques complétés
+    const uniqueCompletedDays = new Set(
+      monthCompletions.map(c => {
+        const d = new Date(c.completedAt)
+        d.setHours(0, 0, 0, 0)
+        return d.toISOString()
+      })
+    )
+
+    const goal = hasSpecificDays ? (habit.monthDays as number[]).length : (habit.monthlyGoal || 0)
+
+    // Vérifier si l'objectif est atteint
+    if (uniqueCompletedDays.size < goal) {
+      return false
+    }
+
+    // Vérifier que la dernière complétion date d'au moins hier
+    if (monthCompletions.length === 0) {
+      return false
+    }
+
+    const sortedCompletions = [...monthCompletions].sort(
+      (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+    )
+
+    const lastCompletionDate = new Date(sortedCompletions[0].completedAt)
+    lastCompletionDate.setHours(0, 0, 0, 0)
+
+    // La dernière complétion doit être strictement avant aujourd'hui
+    return lastCompletionDate.getTime() < todayStart.getTime()
+  }
+
+  return false
+}
+
+/**
+ * Grouper les habitudes : Aujourd'hui vs Autres vs Complétées
  * Habitudes d'aujourd'hui triées : non complétées en premier, complétées à la fin
  */
 export function groupHabits(habits: HabitWithCompletions[], today: Date = new Date()) {
-  const todayHabitsUnsorted = habits.filter((habit) => shouldShowToday(habit, today))
-  const otherHabits = habits.filter((habit) => !shouldShowToday(habit, today))
+  // Identifier les habitudes complétées (hebdo/mensuel 100% depuis hier)
+  const completedHabits = habits.filter((habit) => isFullyCompletedSinceYesterday(habit, today))
+  
+  // Les autres habitudes (exclure les complétées)
+  const remainingHabits = habits.filter((habit) => !isFullyCompletedSinceYesterday(habit, today))
+  
+  const todayHabitsUnsorted = remainingHabits.filter((habit) => shouldShowToday(habit, today))
+  const otherHabits = remainingHabits.filter((habit) => !shouldShowToday(habit, today))
 
   // Trier les habitudes d'aujourd'hui : non complétées en premier
   const todayHabits = todayHabitsUnsorted.sort((a, b) => {
@@ -318,5 +430,5 @@ export function groupHabits(habits: HabitWithCompletions[], today: Date = new Da
     return aCompleted ? 1 : -1
   })
 
-  return { todayHabits, otherHabits }
+  return { todayHabits, otherHabits, completedHabits }
 }
