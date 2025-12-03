@@ -301,109 +301,15 @@ export function getWeekDaysLabels(weekDays: number[] | null | undefined): string
 }
 
 /**
- * Vérifier si une habitude est complétée à 100% aujourd'hui
- * Pour les quotidiennes : complétée aujourd'hui
- * Pour hebdo/mensuel : objectif atteint ET dernière complétion = aujourd'hui
+ * Vérifier si une habitude a été complétée aujourd'hui (peu importe le pourcentage)
+ * Pour toutes les fréquences : retourne true si au moins une complétion aujourd'hui
  */
 export function isFullyCompletedToday(habit: HabitWithCompletions, today: Date = new Date()): boolean {
-  const todayStart = new Date(today)
-  todayStart.setHours(0, 0, 0, 0)
-
-  // Pour les quotidiennes : vérifier si complétée aujourd'hui
-  if (habit.frequency === 'daily') {
-    return isCompletedToday(habit, today)
-  }
-
-  // Pour hebdo/mensuel : vérifier si objectif atteint ET dernière complétion aujourd'hui
-  if (habit.frequency === 'weekly') {
-    if (!habit.weeklyGoal) {
-      return false
-    }
-
-    const weekStart = getWeekStart(today)
-    const weekCompletions = habit.completions.filter((c) => {
-      const completionDate = new Date(c.completedAt)
-      return completionDate >= weekStart
-    })
-
-    // Objectif atteint ?
-    if (weekCompletions.length < habit.weeklyGoal) {
-      return false
-    }
-
-    // Dernière complétion aujourd'hui ?
-    const sortedCompletions = [...weekCompletions].sort(
-      (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
-    )
-
-    if (sortedCompletions.length === 0) {
-      return false
-    }
-
-    const lastCompletionDate = new Date(sortedCompletions[0].completedAt)
-    lastCompletionDate.setHours(0, 0, 0, 0)
-
-    return lastCompletionDate.getTime() === todayStart.getTime()
-  }
-
-  if (habit.frequency === 'monthly') {
-    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
-    monthStart.setHours(0, 0, 0, 0)
-
-    const hasSpecificDays = habit.monthDays && Array.isArray(habit.monthDays) && habit.monthDays.length > 0
-
-    if (!hasSpecificDays && !habit.monthlyGoal) {
-      return false
-    }
-
-    let monthCompletions = habit.completions.filter((c) => {
-      const completionDate = new Date(c.completedAt)
-      return completionDate >= monthStart
-    })
-
-    if (hasSpecificDays) {
-      monthCompletions = monthCompletions.filter((c) => {
-        const completionDate = new Date(c.completedAt)
-        const dayOfMonth = completionDate.getDate()
-        return (habit.monthDays as number[]).includes(dayOfMonth)
-      })
-    }
-
-    const uniqueCompletedDays = new Set(
-      monthCompletions.map(c => {
-        const d = new Date(c.completedAt)
-        d.setHours(0, 0, 0, 0)
-        return d.toISOString()
-      })
-    )
-
-    const goal = hasSpecificDays ? (habit.monthDays as number[]).length : (habit.monthlyGoal || 0)
-
-    // Objectif atteint ?
-    if (uniqueCompletedDays.size < goal) {
-      return false
-    }
-
-    // Dernière complétion aujourd'hui ?
-    if (monthCompletions.length === 0) {
-      return false
-    }
-
-    const sortedCompletions = [...monthCompletions].sort(
-      (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
-    )
-
-    const lastCompletionDate = new Date(sortedCompletions[0].completedAt)
-    lastCompletionDate.setHours(0, 0, 0, 0)
-
-    return lastCompletionDate.getTime() === todayStart.getTime()
-  }
-
-  return false
+  return isCompletedToday(habit, today)
 }
 
 /**
- * Vérifier si une habitude hebdo/mensuelle a atteint 100% et la dernière complétion date d'hier ou avant
+ * Vérifier si une habitude hebdo/mensuelle a été complétée hier ou avant (pas aujourd'hui)
  * Retourne toujours false pour les habitudes quotidiennes
  */
 export function isFullyCompletedPreviously(habit: HabitWithCompletions, today: Date = new Date()): boolean {
@@ -415,91 +321,25 @@ export function isFullyCompletedPreviously(habit: HabitWithCompletions, today: D
   const todayStart = new Date(today)
   todayStart.setHours(0, 0, 0, 0)
 
-  if (habit.frequency === 'weekly') {
-    if (!habit.weeklyGoal) {
-      return false
-    }
+  // Vérifier s'il y a des complétions avant aujourd'hui
+  const hasCompletionsBefore = habit.completions.some((c) => {
+    const completionDate = new Date(c.completedAt)
+    completionDate.setHours(0, 0, 0, 0)
+    return completionDate.getTime() < todayStart.getTime()
+  })
 
-    const weekStart = getWeekStart(today)
-    const weekCompletions = habit.completions.filter((c) => {
-      const completionDate = new Date(c.completedAt)
-      return completionDate >= weekStart
-    })
-
-    // Objectif atteint ?
-    if (weekCompletions.length < habit.weeklyGoal) {
-      return false
-    }
-
-    // Dernière complétion avant aujourd'hui ?
-    const sortedCompletions = [...weekCompletions].sort(
-      (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
-    )
-
-    if (sortedCompletions.length === 0) {
-      return false
-    }
-
-    const lastCompletionDate = new Date(sortedCompletions[0].completedAt)
-    lastCompletionDate.setHours(0, 0, 0, 0)
-
-    return lastCompletionDate.getTime() < todayStart.getTime()
+  // Si aucune complétion avant aujourd'hui, retourner false
+  if (!hasCompletionsBefore) {
+    return false
   }
 
-  if (habit.frequency === 'monthly') {
-    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
-    monthStart.setHours(0, 0, 0, 0)
-
-    const hasSpecificDays = habit.monthDays && Array.isArray(habit.monthDays) && habit.monthDays.length > 0
-
-    if (!hasSpecificDays && !habit.monthlyGoal) {
-      return false
-    }
-
-    let monthCompletions = habit.completions.filter((c) => {
-      const completionDate = new Date(c.completedAt)
-      return completionDate >= monthStart
-    })
-
-    if (hasSpecificDays) {
-      monthCompletions = monthCompletions.filter((c) => {
-        const completionDate = new Date(c.completedAt)
-        const dayOfMonth = completionDate.getDate()
-        return (habit.monthDays as number[]).includes(dayOfMonth)
-      })
-    }
-
-    const uniqueCompletedDays = new Set(
-      monthCompletions.map(c => {
-        const d = new Date(c.completedAt)
-        d.setHours(0, 0, 0, 0)
-        return d.toISOString()
-      })
-    )
-
-    const goal = hasSpecificDays ? (habit.monthDays as number[]).length : (habit.monthlyGoal || 0)
-
-    // Objectif atteint ?
-    if (uniqueCompletedDays.size < goal) {
-      return false
-    }
-
-    // Dernière complétion avant aujourd'hui ?
-    if (monthCompletions.length === 0) {
-      return false
-    }
-
-    const sortedCompletions = [...monthCompletions].sort(
-      (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
-    )
-
-    const lastCompletionDate = new Date(sortedCompletions[0].completedAt)
-    lastCompletionDate.setHours(0, 0, 0, 0)
-
-    return lastCompletionDate.getTime() < todayStart.getTime()
+  // Si l'habitude a été complétée aujourd'hui, elle ne doit pas être dans "précédemment"
+  if (isCompletedToday(habit, today)) {
+    return false
   }
 
-  return false
+  // Sinon, elle a été complétée avant mais pas aujourd'hui
+  return true
 }
 
 /**
