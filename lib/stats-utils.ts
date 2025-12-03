@@ -92,12 +92,12 @@ export async function getWeeklyCompletions(userId: string) {
   // Générer les 7 jours de la semaine
   const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd })
 
-  return weekDays.map((day: any) => {
+  return weekDays.map((day: Date) => {
     const dayStart = startOfDay(day)
     const dayEnd = endOfDay(day)
     
-    const completions = habits.flatMap((h: any) =>
-      h.completions.filter((c: any) => c.completedAt >= dayStart && c.completedAt <= dayEnd)
+    const completions = habits.flatMap((h) =>
+      h.completions.filter((c) => c.completedAt >= dayStart && c.completedAt <= dayEnd)
     ).length
 
     // Traduire les jours en français
@@ -136,12 +136,12 @@ export async function getMonthlyTrend(userId: string) {
   // Générer tous les jours du mois en cours
   const days = eachDayOfInterval({ start: startDate, end: endDate })
 
-  return days.map((day: any) => {
+  return days.map((day: Date) => {
     const dayStart = startOfDay(day)
     const dayEnd = endOfDay(day)
     
-    const completions = habits.flatMap((h: any) =>
-      h.completions.filter((c: any) => c.completedAt >= dayStart && c.completedAt <= dayEnd)
+    const completions = habits.flatMap((h) =>
+      h.completions.filter((c) => c.completedAt >= dayStart && c.completedAt <= dayEnd)
     ).length
 
     return {
@@ -194,7 +194,7 @@ export async function getTopHabits(userId: string) {
 
   // Calculer le taux de complétion pour chaque habitude
   const daysInMonth = now.getDate()
-  const habitsWithRate = habits.map((habit: any) => {
+  const habitsWithRate = habits.map((habit) => {
     const completions = habit.completions.length
     const expected = daysInMonth // Simplifié : suppose daily pour l'instant
     const rate = expected > 0 ? Math.round((completions / expected) * 100) : 0
@@ -211,23 +211,23 @@ export async function getTopHabits(userId: string) {
 
   // Trier par taux décroissant et prendre le top 3
   return habitsWithRate
-    .sort((a: any, b: any) => b.rate - a.rate)
+    .sort((a, b) => b.rate - a.rate)
     .slice(0, 3)
 }
 
 /**
  * Calculer la plus longue streak actuelle
  */
-function calculateLongestStreak(habits: any[]): number {
+function calculateLongestStreak(habits: Array<{ completions: Array<{ completedAt: Date }> }>): number {
   let maxStreak = 0
 
   habits.forEach(habit => {
     const completions = habit.completions
-      .map((c: any) => new Date(c.completedAt))
+      .map((c) => new Date(c.completedAt))
       .sort((a: Date, b: Date) => b.getTime() - a.getTime()) // Du plus récent au plus ancien
 
     let currentStreak = 0
-    let expectedDate = new Date()
+    const expectedDate = new Date()
     expectedDate.setHours(0, 0, 0, 0)
 
     for (const completion of completions) {
@@ -251,7 +251,7 @@ function calculateLongestStreak(habits: any[]): number {
 /**
  * Calculer les jours consécutifs d'activité
  */
-function calculateConsecutiveActivityDays(completions: any[]): number {
+function calculateConsecutiveActivityDays(completions: Array<{ completedAt: Date }>): number {
   if (completions.length === 0) return 0
 
   const dates = completions
