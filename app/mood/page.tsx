@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth'
 import { getMoodEntries } from '@/lib/actions/mood'
 import { BottomNav } from '@/components/navigation/BottomNav'
 import { MoodContent } from '@/components/mood/MoodContent'
+import { PageHeader } from '@/components/navigation/PageHeader'
 
 /**
  * Mood Page - Suivi de l'humeur quotidienne
@@ -28,14 +29,7 @@ export default async function MoodPage() {
 
   return (
     <div className="min-h-screen bg-background-100 pb-20">
-      {/* Header */}
-      <header className="bg-background-200 border-b border-background-500 sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-foreground-800">
-            Mon Humeur
-          </h1>
-        </div>
-      </header>
+      <PageHeader title="Mon Humeur" />
 
       {/* Content */}
       <main className="container mx-auto px-4 py-6">

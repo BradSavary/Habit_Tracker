@@ -3,9 +3,7 @@ import { auth } from '@/lib/auth'
 import { getHabitById } from '@/lib/actions/habits'
 import { HabitDetailContent } from '@/components/habits/HabitDetailContent'
 import { BottomNav } from '@/components/navigation/BottomNav'
-import { ChevronLeft } from 'lucide-react'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/navigation/PageHeader'
 import { Habit, HabitCompletion } from '@prisma/client'
 
 /**
@@ -42,34 +40,21 @@ export default async function HabitDetailPage({
 
   return (
     <div className="min-h-screen bg-background-100 pb-20">
-      {/* Header */}
-      <header className="bg-background-200 border-b border-background-500 sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard">
-              <Button variant="ghost" size="icon">
-                <ChevronLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <div className="flex items-center gap-3 flex-1">
-              <div 
-                className="text-3xl"
-                style={{ fontFamily: '"Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif' }}
-              >
-                {habit.emoji || '✨'}
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground-800">
-                  {habit.name}
-                </h1>
-                {habit.category && (
-                  <p className="text-sm text-foreground-400">{habit.category}</p>
-                )}
-              </div>
+      <PageHeader 
+        title={
+          <div className="flex items-center gap-3">
+            <div 
+              className="text-3xl"
+              style={{ fontFamily: '"Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif' }}
+            >
+              {habit.emoji || '✨'}
             </div>
+            <span>{habit.name}</span>
           </div>
-        </div>
-      </header>
+        }
+        subtitle={habit.category}
+        backHref="/dashboard"
+      />
 
       {/* Content */}
       <main className="container mx-auto px-4 py-6">
