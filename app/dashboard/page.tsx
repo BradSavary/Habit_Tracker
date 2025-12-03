@@ -29,7 +29,7 @@ export default async function DashboardPage() {
   const { habits } = await getHabits(session.user.id)
 
   // Grouper les habitudes
-  const { todayHabits, otherHabits, completedHabits } = groupHabits(habits || [])
+  const { todayHabits, otherHabits, completedToday, completedPreviously } = groupHabits(habits || [])
 
   return (
     <div className="min-h-screen bg-background-100 pb-20">
@@ -67,7 +67,8 @@ export default async function DashboardPage() {
           <DashboardContent
             todayHabits={todayHabits}
             otherHabits={otherHabits}
-            completedHabits={completedHabits}
+            completedToday={completedToday}
+            completedPreviously={completedPreviously}
             userId={session.user.id}
           />
         </Suspense>
