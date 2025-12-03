@@ -78,9 +78,6 @@ export function EditHabitForm({ habit, userId }: EditHabitFormProps) {
   const [selectedDays, setSelectedDays] = useState<number[]>(
     (habit.weekDays as number[] | null) || []
   )
-  const [, setSelectedMonthDays] = useState<number[]>(
-    (habit.monthDays as number[] | null) || []
-  )
   const [useSpecificWeekDays] = useState(
     !!habit.weekDays && (habit.weekDays as number[]).length > 0
   )
