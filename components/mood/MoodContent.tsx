@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,7 +13,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
-import { createMoodEntry } from '@/lib/actions/mood'
+import { createMoodEntry, getMoodEntries } from '@/lib/actions/mood'
 import { toast } from 'sonner'
 
 type MoodEntry = {
@@ -43,9 +43,30 @@ export function MoodContent({ userId, initialMoods }: MoodContentProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [moods, setMoods] = useState<MoodEntry[]>(initialMoods)
+  const [, setIsLoading] = useState(false)
+
+  // Charger les moods du mois quand currentDate change
+  useEffect(() => {
+    const loadMoodsForMonth = async () => {
+      setIsLoading(true)
+      const year = currentDate.getFullYear()
+      const month = currentDate.getMonth()
+      const startOfMonth = new Date(year, month, 1)
+      const endOfMonth = new Date(year, month + 1, 0)
+
+      const result = await getMoodEntries(userId, startOfMonth, endOfMonth)
+      if (result.moods) {
+        setMoods(result.moods)
+      }
+      setIsLoading(false)
+    }
+
+    loadMoodsForMonth()
+  }, [currentDate, userId])
 
   // Convertir les moods en map par date (YYYY-MM-DD)
-  const moodsByDate = initialMoods.reduce(
+  const moodsByDate = moods.reduce(
     (acc, mood) => {
       const dateKey = new Date(mood.date).toISOString().split('T')[0]
       acc[dateKey] = mood
@@ -119,10 +140,19 @@ export function MoodContent({ userId, initialMoods }: MoodContentProps) {
         } else {
           toast.success('Humeur enregistrée')
         }
+        
+        // Recharger les moods du mois
+        const year = currentDate.getFullYear()
+        const month = currentDate.getMonth()
+        const startOfMonth = new Date(year, month, 1)
+        const endOfMonth = new Date(year, month + 1, 0)
+        const updatedMoods = await getMoodEntries(userId, startOfMonth, endOfMonth)
+        if (updatedMoods.moods) {
+          setMoods(updatedMoods.moods)
+        }
+        
         setIsDrawerOpen(false)
         setSelectedDate(null)
-        // Rafraîchir la page pour voir les changements
-        window.location.reload()
       } else {
         toast.error(result.error || 'Erreur lors de l\'enregistrement')
       }
@@ -207,6 +237,7 @@ export function MoodContent({ userId, initialMoods }: MoodContentProps) {
 
         {/* Grille des jours */}
         <motion.div 
+          key={`${currentDate.getFullYear()}-${currentDate.getMonth()}`}
           className="grid grid-cols-7 gap-2"
           initial="hidden"
           animate="visible"
@@ -215,7 +246,7 @@ export function MoodContent({ userId, initialMoods }: MoodContentProps) {
             visible: {
               transition: {
                 staggerChildren: 0.02,
-                delayChildren: 0.3
+                delayChildren: 0.1
               }
             }
           }}

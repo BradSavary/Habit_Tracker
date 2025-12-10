@@ -88,7 +88,7 @@ export function ProgressionContent({ level, xp }: ProgressionContentProps) {
 
         {/* Niveaux */}
         <div className="space-y-0">
-          {levels.map((targetLevel, index) => {
+          {levels.map((targetLevel) => {
             const status = getLevelStatus(targetLevel)
             const emojiReward = getEmojiForLevel(targetLevel)
             const xpForThisLevel = getXpForNextLevel(targetLevel - 1)

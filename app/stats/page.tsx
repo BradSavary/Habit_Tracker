@@ -1,15 +1,26 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { BottomNav } from '@/components/navigation/BottomNav'
-import { BarChart3 } from 'lucide-react'
+import { StatsContent } from '@/components/stats/StatsContent'
+import { PageHeader } from '@/components/navigation/PageHeader'
+import {
+  getUserStats,
+  getWeeklyCompletions,
+  getMonthlyTrend,
+  getHabitsByFrequency,
+  getTopHabits,
+  getBestDayOfWeek,
+} from '@/lib/stats-utils'
 
 /**
- * Stats Page - Placeholder pour les statistiques
+ * Stats Page - Analytics avancées et statistiques détaillées
  * 
- * À implémenter plus tard:
- * - Graphiques de progression
- * - Taux de complétion
- * - Comparaisons mensuelles
+ * Features:
+ * - KPI cards (taux de complétion, streaks, comparaisons)
+ * - Graphiques hebdomadaires et mensuels (Recharts)
+ * - Top 3 des meilleures habitudes
+ * - Répartition par fréquence
+ * - Meilleur jour de la semaine
  */
 
 export default async function StatsPage() {
@@ -18,29 +29,36 @@ export default async function StatsPage() {
     redirect('/login')
   }
 
+  const userId = session.user.id
+
+  // Récupérer toutes les données en parallèle pour optimiser
+  const [stats, weeklyData, monthlyTrend, frequencyData, topHabits, bestDay] =
+    await Promise.all([
+      getUserStats(userId),
+      getWeeklyCompletions(userId),
+      getMonthlyTrend(userId),
+      getHabitsByFrequency(userId),
+      getTopHabits(userId),
+      getBestDayOfWeek(userId),
+    ])
+
   return (
     <div className="min-h-screen bg-background-100 pb-20">
-      {/* Header */}
-      <header className="bg-background-200 border-b border-background-500 sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-foreground-800">
-            Statistiques
-          </h1>
-        </div>
-      </header>
+      <PageHeader
+        title="Statistiques"
+        subtitle="Analyse de tes performances et progression"
+      />
 
-      {/* Placeholder Content */}
-      <main className="container mx-auto px-4 py-12">
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <BarChart3 className="h-24 w-24 text-foreground-300 mb-6" />
-          <h2 className="text-2xl font-bold text-foreground-700 mb-2">
-            Page à venir
-          </h2>
-          <p className="text-foreground-400 max-w-md">
-            Les statistiques détaillées seront bientôt disponibles. Vous pourrez
-            visualiser vos progrès, vos streaks et bien plus !
-          </p>
-        </div>
+      {/* Content */}
+      <main className="container mx-auto px-4 py-6">
+        <StatsContent
+          stats={stats}
+          weeklyData={weeklyData}
+          monthlyTrend={monthlyTrend}
+          frequencyData={frequencyData}
+          topHabits={topHabits}
+          bestDay={bestDay}
+        />
       </main>
 
       <BottomNav />

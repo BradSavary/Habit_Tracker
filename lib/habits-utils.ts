@@ -21,6 +21,7 @@ export interface HabitWithCompletions {
   weekDays?: Prisma.JsonValue // Json type de Prisma (peut être string, number[], null, etc.)
   weeklyGoal?: number | null
   monthlyGoal?: number | null
+  monthDays?: Prisma.JsonValue // Json type de Prisma pour les jours du mois (1-31)
   completions: HabitCompletion[]
 }
 
@@ -216,7 +217,16 @@ export function shouldShowToday(habit: HabitWithCompletions, today: Date = new D
   }
 
   if (habit.frequency === 'monthly') {
-    return true // Afficher toujours (on vérifie le goal dans le mois)
+    // Si l'habitude a des jours précis définis
+    if (habit.monthDays && Array.isArray(habit.monthDays) && habit.monthDays.length > 0) {
+      const dayOfMonth = today.getDate() // 1-31
+      const monthDays = habit.monthDays as number[]
+      return monthDays.includes(dayOfMonth)
+    }
+    
+    // Si l'habitude n'a pas de jours précis (seulement monthlyGoal)
+    // L'afficher toujours
+    return true
   }
 
   return true // Par défaut, afficher
@@ -230,7 +240,15 @@ export function getCompletionProgress(habit: HabitWithCompletions): {
   goal: number
   percentage: number
 } {
-  if (habit.frequency !== 'monthly' || !habit.monthlyGoal) {
+  if (habit.frequency !== 'monthly') {
+    return { current: 0, goal: 0, percentage: 0 }
+  }
+
+  // Vérifier si l'habitude a des jours précis
+  const hasSpecificDays = habit.monthDays && Array.isArray(habit.monthDays) && habit.monthDays.length > 0
+
+  // Si pas de jours précis et pas de goal, retourner 0
+  if (!hasSpecificDays && !habit.monthlyGoal) {
     return { current: 0, goal: 0, percentage: 0 }
   }
 
@@ -238,14 +256,32 @@ export function getCompletionProgress(habit: HabitWithCompletions): {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
   startOfMonth.setHours(0, 0, 0, 0)
 
-  const completionsThisMonth = habit.completions.filter((completion) => {
+  let completionsThisMonth = habit.completions.filter((completion) => {
     const completionDate = new Date(completion.completedAt)
     return completionDate >= startOfMonth
   })
 
-  const current = completionsThisMonth.length
-  const goal = habit.monthlyGoal
-  const percentage = Math.min((current / goal) * 100, 100)
+  // Si jours précis, filtrer les complétions sur ces jours uniquement
+  if (hasSpecificDays) {
+    completionsThisMonth = completionsThisMonth.filter((c) => {
+      const completionDate = new Date(c.completedAt)
+      const dayOfMonth = completionDate.getDate()
+      return (habit.monthDays as number[]).includes(dayOfMonth)
+    })
+  }
+
+  // Compter les jours uniques complétés
+  const uniqueCompletedDays = new Set(
+    completionsThisMonth.map(c => {
+      const d = new Date(c.completedAt)
+      d.setHours(0, 0, 0, 0)
+      return d.toISOString()
+    })
+  ).size
+
+  const current = uniqueCompletedDays
+  const goal = hasSpecificDays ? (habit.monthDays as number[]).length : (habit.monthlyGoal || 0)
+  const percentage = goal > 0 ? Math.min((current / goal) * 100, 100) : 0
 
   return { current, goal, percentage }
 }
@@ -265,12 +301,66 @@ export function getWeekDaysLabels(weekDays: number[] | null | undefined): string
 }
 
 /**
- * Grouper les habitudes : Aujourd'hui vs Autres
+ * Vérifier si une habitude a été complétée aujourd'hui (peu importe le pourcentage)
+ * Pour toutes les fréquences : retourne true si au moins une complétion aujourd'hui
+ */
+export function isFullyCompletedToday(habit: HabitWithCompletions, today: Date = new Date()): boolean {
+  return isCompletedToday(habit, today)
+}
+
+/**
+ * Vérifier si une habitude hebdo/mensuelle a été complétée hier ou avant (pas aujourd'hui)
+ * Retourne toujours false pour les habitudes quotidiennes
+ */
+export function isFullyCompletedPreviously(habit: HabitWithCompletions, today: Date = new Date()): boolean {
+  // Les habitudes quotidiennes ne peuvent jamais être dans cette catégorie
+  if (habit.frequency === 'daily') {
+    return false
+  }
+
+  const todayStart = new Date(today)
+  todayStart.setHours(0, 0, 0, 0)
+
+  // Vérifier s'il y a des complétions avant aujourd'hui
+  const hasCompletionsBefore = habit.completions.some((c) => {
+    const completionDate = new Date(c.completedAt)
+    completionDate.setHours(0, 0, 0, 0)
+    return completionDate.getTime() < todayStart.getTime()
+  })
+
+  // Si aucune complétion avant aujourd'hui, retourner false
+  if (!hasCompletionsBefore) {
+    return false
+  }
+
+  // Si l'habitude a été complétée aujourd'hui, elle ne doit pas être dans "précédemment"
+  if (isCompletedToday(habit, today)) {
+    return false
+  }
+
+  // Sinon, elle a été complétée avant mais pas aujourd'hui
+  return true
+}
+
+/**
+ * Grouper les habitudes : Aujourd'hui vs Autres vs Complétées (aujourd'hui et précédemment)
  * Habitudes d'aujourd'hui triées : non complétées en premier, complétées à la fin
  */
 export function groupHabits(habits: HabitWithCompletions[], today: Date = new Date()) {
-  const todayHabitsUnsorted = habits.filter((habit) => shouldShowToday(habit, today))
-  const otherHabits = habits.filter((habit) => !shouldShowToday(habit, today))
+  // Identifier les habitudes complétées aujourd'hui (quotidiennes + hebdo/mensuel 100% aujourd'hui)
+  const completedToday = habits.filter((habit) => isFullyCompletedToday(habit, today))
+  
+  // Identifier les habitudes complétées précédemment (hebdo/mensuel 100% depuis hier ou avant)
+  const completedPreviously = habits.filter((habit) => isFullyCompletedPreviously(habit, today))
+  
+  // Les habitudes restantes (exclure toutes les complétées)
+  const remainingHabits = habits.filter((habit) => 
+    !isFullyCompletedToday(habit, today) && 
+    !isFullyCompletedPreviously(habit, today)
+  )
+  
+  const todayHabitsUnsorted = remainingHabits.filter((habit) => shouldShowToday(habit, today))
+  const otherHabits = remainingHabits.filter((habit) => !shouldShowToday(habit, today))
 
   // Trier les habitudes d'aujourd'hui : non complétées en premier
   const todayHabits = todayHabitsUnsorted.sort((a, b) => {
@@ -282,5 +372,5 @@ export function groupHabits(habits: HabitWithCompletions[], today: Date = new Da
     return aCompleted ? 1 : -1
   })
 
-  return { todayHabits, otherHabits }
+  return { todayHabits, otherHabits, completedToday, completedPreviously }
 }

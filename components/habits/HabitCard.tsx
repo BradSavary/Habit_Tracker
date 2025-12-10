@@ -12,7 +12,6 @@ import {
   HabitWithCompletions,
   calculateStreak,
   isCompletedToday,
-  getCompletionProgress,
   getWeekDaysLabels,
 } from '@/lib/habits-utils'
 
@@ -197,19 +196,51 @@ export function WeeklyHabitCard({ habit, onToggleComplete, onOpen, className, is
   // Calculer la progression de la semaine
   const today = new Date()
   const weekStart = new Date(today)
-  weekStart.setDate(today.getDate() - today.getDay() + 1) // Lundi
+  const dayOfWeek = weekStart.getDay()
+  // Calculer le lundi de la semaine (0=dimanche, 1=lundi, ..., 6=samedi)
+  const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+  weekStart.setDate(today.getDate() + diff)
   weekStart.setHours(0, 0, 0, 0)
 
   const weekCompletions = habit.completions.filter((c) => {
     const completionDate = new Date(c.completedAt)
+    completionDate.setHours(0, 0, 0, 0)
     return completionDate >= weekStart
   })
+
+  // Pour les habitudes avec jours précis, compter seulement les complétions sur ces jours
+  let relevantCompletions = weekCompletions
+  if (hasSpecificDays) {
+    relevantCompletions = weekCompletions.filter((c) => {
+      const completionDate = new Date(c.completedAt)
+      const dayOfWeek = completionDate.getDay() // 0=dimanche, 6=samedi
+      return (habit.weekDays as number[]).includes(dayOfWeek)
+    })
+  }
+
+  // Compter le nombre de jours uniques complétés (pas le nombre de complétions)
+  const uniqueCompletedDays = new Set(
+    relevantCompletions.map(c => {
+      const d = new Date(c.completedAt)
+      d.setHours(0, 0, 0, 0)
+      return d.toISOString()
+    })
+  ).size
 
   const targetDays = hasSpecificDays 
     ? (habit.weekDays as number[]).length 
     : (habit.weeklyGoal || 7)
-  const completedDays = weekCompletions.length
-  const progressPercentage = (completedDays / targetDays) * 100
+  const completedDays = uniqueCompletedDays
+  const progressPercentage = Math.min((completedDays / targetDays) * 100, 100)
+
+  // Vérifier si l'habitude est complétée aujourd'hui
+  const completedToday = habit.completions.some((c) => {
+    const cDate = new Date(c.completedAt)
+    cDate.setHours(0, 0, 0, 0)
+    const todayNorm = new Date(today)
+    todayNorm.setHours(0, 0, 0, 0)
+    return cDate.getTime() === todayNorm.getTime()
+  })
 
   // Générer les 7 jours de la semaine avec leur état (uniquement si jours précis)
   type WeekDay = { day: number; date: Date; isCompleted: boolean; isActive: boolean; isToday: boolean }
@@ -224,7 +255,10 @@ export function WeeklyHabitCard({ habit, onToggleComplete, onOpen, className, is
         return cDate.getTime() === dayDate.getTime()
       })
       // Le jour est activé si il fait partie des weekDays
-      const isActive = (habit.weekDays as number[]).includes(i + 1) // +1 car weekDays est 1-7 (lun-dim)
+      // i correspond à 0=lundi, 1=mardi, ..., 6=dimanche
+      // weekDays dans Prisma: 0=dimanche, 1=lundi, ..., 6=samedi
+      const dayIndex = i === 6 ? 0 : i + 1 // Convertir notre index vers l'index Prisma
+      const isActive = (habit.weekDays as number[]).includes(dayIndex)
       const isToday = dayDate.toDateString() === today.toDateString()
       weekDays.push({ day: i, date: dayDate, isCompleted, isActive, isToday })
     }
@@ -321,17 +355,46 @@ export function WeeklyHabitCard({ habit, onToggleComplete, onOpen, className, is
           )}
 
         {/* Progress */}
-        <div className="space-y-1">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-foreground-500">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-foreground-500">
               {completedDays}/{targetDays} {hasSpecificDays ? 'jours' : 'fois'}
             </span>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               {isLoading && <Loader2 className="h-3 w-3 animate-spin text-foreground-400" />}
-              <span className="text-foreground-500">{Math.round(progressPercentage)}%</span>
+              {/* Checkmark visuel pour indiquer la complétion - Cliquable */}
+              <motion.div
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (!isLoading) onToggleComplete()
+                }}
+                className={cn(
+                  'w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all',
+                  isLoading ? 'cursor-wait' : 'cursor-pointer',
+                  completedToday
+                    ? 'bg-[var(--success)] border-[var(--success)] text-background-100'
+                    : 'border-foreground-300 hover:border-primary'
+                )}
+                whileTap={{ scale: 0.85 }}
+                animate={completedToday ? { scale: 1.05 } : { scale: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+              >
+                {completedToday && (
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Check className="h-4 w-4" />
+                  </motion.div>
+                )}
+              </motion.div>
             </div>
           </div>
-          <Progress value={progressPercentage} className="h-2" />
+          <div className="space-y-1">
+            <Progress value={progressPercentage} className="h-2" />
+            <span className="text-xs text-foreground-400 float-right">{Math.round(progressPercentage)}%</span>
+          </div>
         </div>
         </div>
       </Card>
@@ -347,10 +410,11 @@ export function MonthlyHabitCard({ habit, onToggleComplete, onOpen, className, i
   const [clickTimeout, setClickTimeout] = useState<NodeJS.Timeout | null>(null)
   
   const streak = calculateStreak(habit)
-  const { current, goal, percentage } = getCompletionProgress(habit)
   const habitColor = (habit.color || 'purple') as 'purple' | 'blue' | 'green' | 'orange' | 'pink' | 'teal'
   const borderStyle = getHabitBorderStyle(habitColor)
-  const badgeStyle = getHabitBadgeStyle(habitColor)
+
+  // Vérifier si l'habitude a des jours précis définis
+  const hasSpecificDays = habit.monthDays && Array.isArray(habit.monthDays) && habit.monthDays.length > 0
 
   const handleCardClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -369,6 +433,56 @@ export function MonthlyHabitCard({ habit, onToggleComplete, onOpen, className, i
       setClickTimeout(timeout)
     }
   }
+
+  // Calculer la progression du mois
+  const today = new Date()
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
+  monthStart.setHours(0, 0, 0, 0)
+
+  const monthCompletions = habit.completions.filter((c) => {
+    const completionDate = new Date(c.completedAt)
+    completionDate.setHours(0, 0, 0, 0)
+    return completionDate >= monthStart
+  })
+
+  // Pour les habitudes avec jours précis, compter seulement les complétions sur ces jours
+  let relevantCompletions = monthCompletions
+  if (hasSpecificDays) {
+    relevantCompletions = monthCompletions.filter((c) => {
+      const completionDate = new Date(c.completedAt)
+      const dayOfMonth = completionDate.getDate() // 1-31
+      return (habit.monthDays as number[]).includes(dayOfMonth)
+    })
+  }
+
+  // Compter le nombre de jours uniques complétés
+  const uniqueCompletedDays = new Set(
+    relevantCompletions.map(c => {
+      const d = new Date(c.completedAt)
+      d.setHours(0, 0, 0, 0)
+      return d.toISOString()
+    })
+  ).size
+
+  const targetDays = hasSpecificDays 
+    ? (habit.monthDays as number[]).length 
+    : (habit.monthlyGoal || 30)
+  const completedDays = uniqueCompletedDays
+  const progressPercentage = Math.min((completedDays / targetDays) * 100, 100)
+
+  // Vérifier si l'habitude est complétée aujourd'hui
+  const completedToday = habit.completions.some((c) => {
+    const cDate = new Date(c.completedAt)
+    cDate.setHours(0, 0, 0, 0)
+    const todayNorm = new Date(today)
+    todayNorm.setHours(0, 0, 0, 0)
+    return cDate.getTime() === todayNorm.getTime()
+  })
+
+  // Données pour l'affichage
+  const current = completedDays
+  const goal = targetDays
+  const percentage = progressPercentage
 
   return (
     <motion.div
@@ -397,9 +511,15 @@ export function MonthlyHabitCard({ habit, onToggleComplete, onOpen, className, i
             </motion.div>
             <div>
               <h3 className="font-semibold text-foreground-800">{habit.name}</h3>
-              <p className="text-xs text-foreground-400">
-                Objectif: {goal} fois par mois
-              </p>
+              {hasSpecificDays ? (
+                <p className="text-xs text-foreground-400">
+                  {(habit.monthDays as number[]).sort((a, b) => a - b).join(', ')} du mois
+                </p>
+              ) : (
+                <p className="text-xs text-foreground-400">
+                  Objectif: {goal} fois par mois
+                </p>
+              )}
             </div>
           </div>
 
@@ -417,25 +537,52 @@ export function MonthlyHabitCard({ habit, onToggleComplete, onOpen, className, i
         </div>
 
         {/* Progress Bar */}
-        <div className="space-y-1">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-foreground-500">
-              {current}/{goal} fois ce mois
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-foreground-500">
+              {current}/{goal} {hasSpecificDays ? 'jours' : 'fois'} ce mois
             </span>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               {isLoading && <Loader2 className="h-3 w-3 animate-spin text-foreground-400" />}
-              <span className="text-foreground-500">{Math.round(percentage)}%</span>
+              {/* Checkmark visuel pour indiquer la complétion - Cliquable */}
+              <motion.div
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (!isLoading) onToggleComplete()
+                }}
+                className={cn(
+                  'w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all',
+                  isLoading ? 'cursor-wait' : 'cursor-pointer',
+                  completedToday
+                    ? 'bg-[var(--success)] border-[var(--success)] text-background-100'
+                    : 'border-foreground-300 hover:border-primary'
+                )}
+                whileTap={{ scale: 0.85 }}
+                animate={completedToday ? { scale: 1.05 } : { scale: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+              >
+                {completedToday && (
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Check className="h-4 w-4" />
+                  </motion.div>
+                )}
+              </motion.div>
             </div>
           </div>
-          <Progress value={percentage} className="h-2" />
+          <div className="space-y-1">
+            <Progress value={percentage} className="h-2" />
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-foreground-400">{Math.round(percentage)}%</span>
+              {percentage >= 100 && (
+                <span className="text-xs text-[var(--success)] font-medium">Objectif atteint ! 🎉</span>
+              )}
+            </div>
+          </div>
         </div>
-
-        {/* Status Badge */}
-        {current >= goal && (
-          <Badge style={badgeStyle}>
-            Objectif atteint ! 🎉
-          </Badge>
-        )}
         </div>
       </Card>
     </motion.div>
