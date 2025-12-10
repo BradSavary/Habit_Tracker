@@ -1,11 +1,15 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { Trophy, Star, Lock } from 'lucide-react'
+import { Trophy, Star, Lock, ChevronRight, LogOut } from 'lucide-react'
 import { getProgressionStats } from '@/lib/progression'
 import { EMOJI_REWARDS, countUnlockedEmojis } from '@/lib/emojis-system'
+import { logoutUser } from '@/lib/actions/auth'
+import { motion } from 'framer-motion'
 
 /**
  * ProfileContent - Contenu de la page profil
@@ -24,27 +28,68 @@ type ProfileContentProps = {
   }
   stats: {
     totalHabits: number
-    totalCompletions: number
+    dailyHabits: number
+    weeklyHabits: number
+    monthlyHabits: number
   }
 }
 
 export function ProfileContent({ user, stats }: ProfileContentProps) {
+  const router = useRouter()
   const progression = getProgressionStats(user.xp)
   const emojiStats = countUnlockedEmojis(user.level)
+
+  const handleSignOut = async () => {
+    try {
+      await logoutUser()
+      // Redirection côté client pour éviter les problèmes de localhost
+      router.push('/login')
+      router.refresh()
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error)
+      // Forcer la redirection même en cas d'erreur
+      router.push('/login')
+      router.refresh()
+    }
+  }
 
   return (
     <div className="space-y-6">
       {/* Header avec nom et toggle thème */}
-      <div className="flex items-center justify-between">
+      <motion.div 
+        className="flex items-center justify-between"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         <div>
           <h2 className="text-2xl font-bold text-foreground-800">{user.name}</h2>
           <p className="text-sm text-foreground-400">{user.email}</p>
         </div>
-        <ThemeToggle />
-      </div>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={handleSignOut}
+            title="Se déconnecter"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
+      </motion.div>
 
-      {/* Carte Niveau & XP */}
-      <Card className="p-6 space-y-4">
+      {/* Carte Niveau & XP - Cliquable */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <Card 
+          className="p-6 space-y-4 cursor-pointer hover:bg-background-400 transition-colors"
+          onClick={() => router.push('/profile/progression')}
+        >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-full bg-primary/10">
@@ -55,14 +100,17 @@ export function ProfileContent({ user, stats }: ProfileContentProps) {
               <p className="text-3xl font-bold text-foreground-800">{progression.level}</p>
             </div>
           </div>
-          {!progression.isMaxLevel && (
-            <div className="text-right">
-              <p className="text-sm text-foreground-400">Prochain niveau</p>
-              <p className="text-lg font-semibold text-foreground-700">
-                {progression.xpRemaining} XP
-              </p>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {!progression.isMaxLevel && (
+              <div className="text-right">
+                <p className="text-sm text-foreground-400">Prochain niveau</p>
+                <p className="text-lg font-semibold text-foreground-700">
+                  {progression.xpRemaining} XP
+                </p>
+              </div>
+            )}
+            <ChevronRight className="h-5 w-5 text-foreground-400" />
+          </div>
         </div>
 
         {/* Barre de progression */}
@@ -86,21 +134,40 @@ export function ProfileContent({ user, stats }: ProfileContentProps) {
           </div>
         )}
       </Card>
+      </motion.div>
 
-      {/* Statistiques */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="p-4">
-          <p className="text-sm text-foreground-400 mb-1">Habitudes</p>
-          <p className="text-2xl font-bold text-foreground-800">{stats.totalHabits}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-foreground-400 mb-1">Complétions</p>
-          <p className="text-2xl font-bold text-foreground-800">{stats.totalCompletions}</p>
-        </Card>
-      </div>
+      {/* Statistiques Habitudes */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+      >
+        <Card className="p-6 space-y-4">
+        <h3 className="font-semibold text-foreground-800">Mes habitudes</h3>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-foreground-800">{stats.dailyHabits}</p>
+            <p className="text-sm text-foreground-400">Quotidiennes</p>
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-bold text-foreground-800">{stats.weeklyHabits}</p>
+            <p className="text-sm text-foreground-400">Hebdomadaires</p>
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-bold text-foreground-800">{stats.monthlyHabits}</p>
+            <p className="text-sm text-foreground-400">Mensuelles</p>
+          </div>
+        </div>
+      </Card>
+      </motion.div>
 
       {/* Galerie d'emojis débloqués + 5 prochains */}
-      <Card className="p-6 space-y-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
+      >
+        <Card className="p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Star className="h-5 w-5 text-primary" />
@@ -114,13 +181,26 @@ export function ProfileContent({ user, stats }: ProfileContentProps) {
         <Progress value={emojiStats.percentage} className="h-2" />
 
         {/* Grille d'emojis - tous les 50 emojis avec 3 états: débloqués, 5 prochains en grisé, reste locked */}
-        <div className="grid grid-cols-6 gap-3">
+        <motion.div 
+          className="grid grid-cols-6 gap-3"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: {
+              transition: {
+                staggerChildren: 0.02,
+                delayChildren: 0.4
+              }
+            }
+          }}
+        >
           {EMOJI_REWARDS.map((reward) => {
             const isUnlocked = reward.level <= user.level
             const isNextReward = !isUnlocked && reward.level <= user.level + 5
 
             return (
-              <div
+              <motion.div
                 key={reward.emoji}
                 className={`relative flex flex-col items-center justify-center p-3 rounded-lg border ${
                   isUnlocked
@@ -130,6 +210,11 @@ export function ProfileContent({ user, stats }: ProfileContentProps) {
                     : 'border-muted/50 bg-muted/20 opacity-50'
                 }`}
                 title={isUnlocked ? reward.name : `Niveau ${reward.level} requis`}
+                variants={{
+                  hidden: { opacity: 0, scale: 0.8 },
+                  visible: { opacity: 1, scale: 1 }
+                }}
+                whileTap={isUnlocked ? { scale: 1.1 } : {}}
               >
                 {isUnlocked ? (
                   <>
@@ -169,11 +254,12 @@ export function ProfileContent({ user, stats }: ProfileContentProps) {
                     </span>
                   </>
                 )}
-              </div>
+              </motion.div>
             )
           })}
-        </div>
+        </motion.div>
       </Card>
+      </motion.div>
     </div>
   )
 }

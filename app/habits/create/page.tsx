@@ -1,9 +1,7 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { CreateHabitForm } from '@/components/habits/CreateHabitForm'
-import { ChevronLeft } from 'lucide-react'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/navigation/PageHeader'
 import prisma from '@/lib/prisma'
 
 /**
@@ -28,26 +26,11 @@ export default async function CreateHabitPage() {
 
   return (
     <div className="min-h-screen bg-background-100">
-      {/* Header */}
-      <header className="bg-background-200 border-b border-background-500 sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard">
-              <Button variant="ghost" size="icon">
-                <ChevronLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground-800">
-                Nouvelle habitude
-              </h1>
-              <p className="text-sm text-foreground-400">
-                Créez une habitude pour atteindre vos objectifs
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PageHeader 
+        title="Nouvelle habitude"
+        subtitle="Créez une nouvelle habitude"
+        backHref="/dashboard"
+      />
 
       {/* Form */}
       <main className="container mx-auto px-4 py-6 pb-20">

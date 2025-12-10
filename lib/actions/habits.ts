@@ -25,8 +25,11 @@ const habitSchema = z.object({
   ]).optional(),
   color: z.enum(['purple', 'blue', 'green', 'orange', 'pink', 'teal']).optional(),
   frequency: z.enum(['daily', 'weekly', 'monthly']).default('daily'),
-  weekDays: z.array(z.number().min(0).max(6)).optional(), // 0 = dimanche, 6 = samedi
+  weekDays: z.array(z.number().min(0).max(6)).optional(), // 0 = dimanche, 6 = samedi - jours spécifiques
+  weeklyGoal: z.number().min(1).max(7).optional(), // Nombre de fois par semaine
   monthlyGoal: z.number().min(1).max(31).optional(),
+  monthDays: z.array(z.number().min(1).max(31)).optional(), // Jours spécifiques du mois (1-31)
+  endDate: z.date().optional(), // Date de fin de l'habitude
 })
 
 const updateHabitSchema = habitSchema.extend({
@@ -56,6 +59,8 @@ export async function createHabit(data: CreateHabitInput) {
         ...validatedData,
         userId: data.userId,
         weekDays: validatedData.weekDays || undefined,
+        monthDays: validatedData.monthDays || undefined,
+        endDate: validatedData.endDate || undefined,
       },
     })
 
@@ -199,6 +204,7 @@ export async function deleteHabit(habitId: string, userId: string) {
  * Basculer la complétion d'une habitude (toggle)
  */
 export async function toggleHabitCompletion(habitId: string, userId: string, date?: Date) {
+  console.log(`[XP DEBUG] toggleHabitCompletion called for habit: ${habitId}`)
   try {
     // Vérifier que l'habitude appartient à l'utilisateur
     const habit = await prisma.habit.findFirst({
@@ -209,12 +215,14 @@ export async function toggleHabitCompletion(habitId: string, userId: string, dat
     })
 
     if (!habit) {
+      console.log(`[XP DEBUG] Habit not found`)
       return { success: false, error: 'Habitude introuvable ou non autorisée' }
     }
 
     // Normaliser la date au début de la journée
     const completionDate = date || new Date()
     completionDate.setHours(0, 0, 0, 0)
+    console.log(`[XP DEBUG] Completion date: ${completionDate.toISOString()}`)
     
     // === VALIDATION DES JOURS POUR WEEKLY/MONTHLY ===
     const today = new Date()
@@ -239,7 +247,33 @@ export async function toggleHabitCompletion(habitId: string, userId: string, dat
       }
     }
 
-    // Vérifier si une complétion existe déjà pour cette date
+    // Pour les habitudes mensuelles avec jours précis, vérifier que le jour actuel est dans monthDays
+    if (habit.frequency === 'monthly' && habit.monthDays) {
+      const currentDayOfMonth = today.getDate() // 1-31
+      const monthDaysArray = habit.monthDays as number[] // Cast JSON to number[]
+      
+      if (!monthDaysArray.includes(currentDayOfMonth)) {
+        return { 
+          success: false, 
+          error: `Cette habitude ne peut être complétée que les ${monthDaysArray.sort((a, b) => a - b).join(', ')} du mois` 
+        }
+      }
+    }
+
+    // Vérifier si l'XP a déjà été accordé aujourd'hui pour cette habitude
+    const existingXpGrant = await prisma.habitXpGrant.findUnique({
+      where: {
+        habitId_userId_grantedDate: {
+          habitId,
+          userId,
+          grantedDate: completionDate,
+        },
+      },
+    })
+    
+    console.log(`[XP] Habit ${habitId} - XP already granted today: ${existingXpGrant ? 'YES' : 'NO'}`)
+
+    // Vérifier si une complétion existe déjà pour cette date exacte
     const existingCompletion = await prisma.habitCompletion.findFirst({
       where: {
         habitId,
@@ -249,6 +283,8 @@ export async function toggleHabitCompletion(habitId: string, userId: string, dat
 
     if (existingCompletion) {
       // Si elle existe, la supprimer (toggle off)
+      // ⚠️ PAS D'XP EN ARRIÈRE - on ne retire pas l'XP gagné
+      console.log(`[XP] Deleting completion, no XP change`)
       await prisma.habitCompletion.delete({
         where: { id: existingCompletion.id },
       })
@@ -256,7 +292,7 @@ export async function toggleHabitCompletion(habitId: string, userId: string, dat
       revalidatePath(`/habits/${habitId}`)
       return { success: true, completed: false }
     } else {
-      // Sinon, la créer (toggle on) + donner XP
+      // Créer la complétion
       await prisma.habitCompletion.create({
         data: {
           habitId,
@@ -264,59 +300,78 @@ export async function toggleHabitCompletion(habitId: string, userId: string, dat
         },
       })
       
+      // L'XP n'est donné QUE si aucun XP n'a été accordé aujourd'hui
+      const isFirstCompletionToday = !existingXpGrant
+      console.log(`[XP] Creating completion, isFirstToday: ${isFirstCompletionToday}, will give XP: ${isFirstCompletionToday}`)
+      
       // === SYSTÈME DE PROGRESSION ===
-      // Calculer l'XP gagné selon la fréquence de l'habitude
-      const xpGained = getXpForCompletion(habit.frequency)
-      
-      // Récupérer l'utilisateur pour vérifier le level up
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { xp: true, level: true },
-      })
-      
-      if (user) {
-        const newXp = user.xp + xpGained
-        const levelUpData = checkLevelUp(user.xp, xpGained)
+      // Ne donner de l'XP QUE si c'est la première complétion du jour
+      if (isFirstCompletionToday) {
+        // Calculer l'XP gagné selon la fréquence de l'habitude
+        const xpGained = getXpForCompletion(habit.frequency)
+        console.log(`[XP] Granting ${xpGained} XP for first completion today`)
         
-        // Mettre à jour l'XP et le level de l'utilisateur
-        await prisma.user.update({
-          where: { id: userId },
+        // Enregistrer que l'XP a été accordé aujourd'hui (cette entrée ne sera JAMAIS supprimée)
+        await prisma.habitXpGrant.create({
           data: {
-            xp: newXp,
-            level: levelUpData.newLevel,
+            habitId,
+            userId,
+            xpGranted: xpGained,
+            grantedDate: completionDate,
           },
         })
         
-        // Si level up, retourner les informations
-        if (levelUpData.hasLeveledUp) {
-          const newEmojiReward = getEmojiForLevel(levelUpData.newLevel)
+        // Récupérer l'utilisateur pour vérifier le level up
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { xp: true, level: true },
+        })
+        
+        if (user) {
+          const newXp = user.xp + xpGained
+          const levelUpData = checkLevelUp(user.xp, xpGained)
           
+          // Mettre à jour l'XP et le level de l'utilisateur
+          await prisma.user.update({
+            where: { id: userId },
+            data: {
+              xp: newXp,
+              level: levelUpData.newLevel,
+            },
+          })
+          console.log(`[XP] User XP updated: ${user.xp} → ${newXp}`)
+          
+          // Si level up, retourner les informations
+          if (levelUpData.hasLeveledUp) {
+            const newEmojiReward = getEmojiForLevel(levelUpData.newLevel)
+            
+            revalidatePath('/dashboard')
+            revalidatePath(`/habits/${habitId}`)
+            revalidatePath('/profile')
+            
+            return {
+              success: true,
+              completed: true,
+              xpGained,
+              levelUp: {
+                newLevel: levelUpData.newLevel,
+                previousLevel: levelUpData.previousLevel,
+                unlockedEmoji: newEmojiReward,
+              },
+            }
+          }
+          
+          // Pas de level up, juste retour normal avec XP
           revalidatePath('/dashboard')
           revalidatePath(`/habits/${habitId}`)
-          revalidatePath('/profile')
-          
-          return {
-            success: true,
-            completed: true,
-            xpGained,
-            levelUp: {
-              newLevel: levelUpData.newLevel,
-              previousLevel: levelUpData.previousLevel,
-              unlockedEmoji: newEmojiReward,
-            },
-          }
+          return { success: true, completed: true, xpGained }
         }
-        
-        // Pas de level up, juste retour normal avec XP
-        revalidatePath('/dashboard')
-        revalidatePath(`/habits/${habitId}`)
-        return { success: true, completed: true, xpGained }
       }
       
-      // Fallback si utilisateur pas trouvé (ne devrait jamais arriver)
+      // Pas de XP gagné (re-complétion du jour)
       revalidatePath('/dashboard')
       revalidatePath(`/habits/${habitId}`)
-      return { success: true, completed: true }
+      return { success: true, completed: true, xpGained: 0 }
     }
   } catch (error) {
     console.error('Error toggling habit completion:', error)

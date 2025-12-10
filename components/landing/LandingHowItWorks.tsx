@@ -1,13 +1,39 @@
+'use client'
+
+import { motion } from 'framer-motion'
+
 export function LandingHowItWorks() {
   return (
     <section className="py-20">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground-900 mb-12 text-center">
+          <motion.h2 
+            className="text-3xl md:text-4xl font-bold text-foreground-900 mb-12 text-center"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.5 }}
+          >
             Comment ça marche ?
-          </h2>
-          <div className="space-y-8">
-            <div className="flex gap-6 items-start">
+          </motion.h2>
+          <motion.div 
+            className="space-y-8"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={{
+              hidden: {},
+              visible: {
+                transition: {
+                  staggerChildren: 0.2
+                }
+              }
+            }}
+          >
+            <motion.div 
+              className="flex gap-6 items-start"
+              variants={{ hidden: { opacity: 0, x: -50 }, visible: { opacity: 1, x: 0 } }}
+            >
               <div className="flex-shrink-0 w-12 h-12 rounded-full bg-background-300 flex items-center justify-center">
                 <span className="text-2xl font-bold text-foreground-800">1</span>
               </div>
@@ -21,9 +47,12 @@ export function LandingHowItWorks() {
                   avec des icônes et des couleurs.
                 </p>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="flex gap-6 items-start">
+            <motion.div 
+              className="flex gap-6 items-start"
+              variants={{ hidden: { opacity: 0, x: -50 }, visible: { opacity: 1, x: 0 } }}
+            >
               <div className="flex-shrink-0 w-12 h-12 rounded-full bg-background-300 flex items-center justify-center">
                 <span className="text-2xl font-bold text-foreground-800">2</span>
               </div>
@@ -36,9 +65,12 @@ export function LandingHowItWorks() {
                   (séries de jours consécutifs) et votre progression sur un calendrier intuitif.
                 </p>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="flex gap-6 items-start">
+            <motion.div 
+              className="flex gap-6 items-start"
+              variants={{ hidden: { opacity: 0, x: -50 }, visible: { opacity: 1, x: 0 } }}
+            >
               <div className="flex-shrink-0 w-12 h-12 rounded-full bg-background-300 flex items-center justify-center">
                 <span className="text-2xl font-bold text-foreground-800">3</span>
               </div>
@@ -51,8 +83,8 @@ export function LandingHowItWorks() {
                   grâce aux indicateurs visuels et aux feedbacks positifs.
                 </p>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </section>

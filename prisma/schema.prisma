@@ -86,10 +86,12 @@ model Habit {
   emoji       String?  // Emoji représentant l'habitude
   category    String?  // Catégorie: Santé, Productivité, Sport, Créativité, Social, Apprentissage, Autre
   color       String?  // Couleur accent (purple, blue, green, orange, pink, teal)
-  icon        String?
   frequency   String   @default("daily") // daily, weekly, monthly
-  weekDays    Json?    // Pour weekly: [0,1,2,3,4,5,6] (dimanche à samedi)
+  weekDays    Json?    // Pour weekly: [0,1,2,3,4,5,6] (dimanche à samedi) - jours spécifiques
+  weeklyGoal  Int?     // Pour weekly: nombre de fois par semaine (si weekDays non spécifié)
   monthlyGoal Int?     // Pour monthly: nombre de fois dans le mois
+  monthDays   Json?    // Pour monthly: [4, 12, 25] - jours spécifiques du mois (1-31)
+  endDate     DateTime? // Date de fin / échéance de l'habitude
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
@@ -106,9 +108,23 @@ model HabitCompletion {
   habit       Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
   completedAt DateTime @default(now())
   notes       String?
+  createdAt   DateTime @default(now()) // Pour tracker la première création
 
   @@unique([habitId, completedAt])
   @@map("habit_completions")
+}
+
+// Modèle pour tracker les XP accordés (ne se supprime jamais)
+model HabitXpGrant {
+  id          String   @id @default(cuid())
+  habitId     String
+  userId      String
+  xpGranted   Int
+  grantedDate DateTime // Date normalisée (00:00:00)
+  createdAt   DateTime @default(now())
+
+  @@unique([habitId, userId, grantedDate])
+  @@map("habit_xp_grants")
 }
 
 // Modèle MoodEntry pour le suivi de l'humeur quotidienne

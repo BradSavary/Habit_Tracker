@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import {
   Drawer,
@@ -12,7 +13,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
-import { createMoodEntry } from '@/lib/actions/mood'
+import { createMoodEntry, getMoodEntries } from '@/lib/actions/mood'
 import { toast } from 'sonner'
 
 type MoodEntry = {
@@ -42,9 +43,30 @@ export function MoodContent({ userId, initialMoods }: MoodContentProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [moods, setMoods] = useState<MoodEntry[]>(initialMoods)
+  const [, setIsLoading] = useState(false)
+
+  // Charger les moods du mois quand currentDate change
+  useEffect(() => {
+    const loadMoodsForMonth = async () => {
+      setIsLoading(true)
+      const year = currentDate.getFullYear()
+      const month = currentDate.getMonth()
+      const startOfMonth = new Date(year, month, 1)
+      const endOfMonth = new Date(year, month + 1, 0)
+
+      const result = await getMoodEntries(userId, startOfMonth, endOfMonth)
+      if (result.moods) {
+        setMoods(result.moods)
+      }
+      setIsLoading(false)
+    }
+
+    loadMoodsForMonth()
+  }, [currentDate, userId])
 
   // Convertir les moods en map par date (YYYY-MM-DD)
-  const moodsByDate = initialMoods.reduce(
+  const moodsByDate = moods.reduce(
     (acc, mood) => {
       const dateKey = new Date(mood.date).toISOString().split('T')[0]
       acc[dateKey] = mood
@@ -118,10 +140,19 @@ export function MoodContent({ userId, initialMoods }: MoodContentProps) {
         } else {
           toast.success('Humeur enregistrée')
         }
+        
+        // Recharger les moods du mois
+        const year = currentDate.getFullYear()
+        const month = currentDate.getMonth()
+        const startOfMonth = new Date(year, month, 1)
+        const endOfMonth = new Date(year, month + 1, 0)
+        const updatedMoods = await getMoodEntries(userId, startOfMonth, endOfMonth)
+        if (updatedMoods.moods) {
+          setMoods(updatedMoods.moods)
+        }
+        
         setIsDrawerOpen(false)
         setSelectedDate(null)
-        // Rafraîchir la page pour voir les changements
-        window.location.reload()
       } else {
         toast.error(result.error || 'Erreur lors de l\'enregistrement')
       }
@@ -145,9 +176,14 @@ export function MoodContent({ userId, initialMoods }: MoodContentProps) {
   const calendarDays = generateCalendarDays()
 
   return (
-    <div className="min-h-screen bg-background pb-20 px-4">
-      {/* En-tête */}
-      <div className="flex items-center justify-between py-6">
+    <div className="space-y-6">
+      {/* En-tête mois */}
+      <motion.div 
+        className="flex items-center justify-between"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         <Button
           variant="ghost"
           size="icon"
@@ -169,28 +205,52 @@ export function MoodContent({ userId, initialMoods }: MoodContentProps) {
         >
           <ChevronRight className="h-6 w-6" />
         </Button>
-      </div>
+      </motion.div>
 
       {/* Légende */}
-      <div className="mb-4 p-3 bg-muted/30 rounded-lg border border-muted">
+      <motion.div 
+        className="mb-4 p-3 bg-muted/30 rounded-lg border border-muted"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+      >
         <p className="text-xs text-muted-foreground text-center">
           Seul le jour actuel (surligné) peut être modifié. Les autres jours sont grisés.
         </p>
-      </div>
+      </motion.div>
 
       {/* Calendrier */}
       <div className="space-y-4">
         {/* En-têtes des jours */}
-        <div className="grid grid-cols-7 gap-2 text-center">
+        <motion.div 
+          className="grid grid-cols-7 gap-2 text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+        >
           {DAYS_OF_WEEK.map((day) => (
             <div key={day} className="text-sm font-medium text-muted-foreground">
               {day}
             </div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Grille des jours */}
-        <div className="grid grid-cols-7 gap-2">
+        <motion.div 
+          key={`${currentDate.getFullYear()}-${currentDate.getMonth()}`}
+          className="grid grid-cols-7 gap-2"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: {
+              transition: {
+                staggerChildren: 0.02,
+                delayChildren: 0.1
+              }
+            }
+          }}
+        >
           {calendarDays.map((date, index) => {
             if (!date) {
               return <div key={`empty-${index}`} className="aspect-square" />
@@ -200,7 +260,7 @@ export function MoodContent({ userId, initialMoods }: MoodContentProps) {
             const isTodayDate = isToday(date)
 
             return (
-              <div
+              <motion.div
                 key={date.toISOString()}
                 className={`aspect-square relative flex flex-col items-center justify-center rounded-lg border ${
                   isTodayDate
@@ -209,6 +269,11 @@ export function MoodContent({ userId, initialMoods }: MoodContentProps) {
                     ? 'bg-card opacity-70'
                     : 'bg-muted/30 opacity-50'
                 }`}
+                variants={{
+                  hidden: { opacity: 0, scale: 0.8 },
+                  visible: { opacity: 1, scale: 1 }
+                }}
+                whileTap={isTodayDate ? { scale: 0.95 } : {}}
               >
                 {/* Numéro du jour */}
                 <span
@@ -257,10 +322,10 @@ export function MoodContent({ userId, initialMoods }: MoodContentProps) {
                   // Cercle vide grisé pour les autres jours (non cliquable)
                   <div className="w-8 h-8 rounded-full border border-muted/50" />
                 )}
-              </div>
+              </motion.div>
             )
           })}
-        </div>
+        </motion.div>
       </div>
 
       {/* Drawer pour sélectionner un emoji */}

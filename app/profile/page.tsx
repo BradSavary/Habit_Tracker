@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { BottomNav } from '@/components/navigation/BottomNav'
+import { PageHeader } from '@/components/navigation/PageHeader'
 import { ProfileContent } from '@/components/profile/ProfileContent'
 import prisma from '@/lib/prisma'
 
@@ -29,9 +30,7 @@ export default async function ProfilePage() {
       xp: true,
       habits: {
         select: {
-          completions: {
-            select: { completedAt: true },
-          },
+          frequency: true,
         },
       },
     },
@@ -41,22 +40,14 @@ export default async function ProfilePage() {
     redirect('/login')
   }
 
-  // Compter les complétions totales
-  const totalCompletions = user.habits.reduce(
-    (sum, habit) => sum + habit.completions.length,
-    0
-  )
+  // Compter les habitudes par fréquence
+  const dailyHabits = user.habits.filter(h => h.frequency === 'daily').length
+  const weeklyHabits = user.habits.filter(h => h.frequency === 'weekly').length
+  const monthlyHabits = user.habits.filter(h => h.frequency === 'monthly').length
 
   return (
     <div className="min-h-screen bg-background-100 pb-20">
-      {/* Header */}
-      <header className="bg-background-200 border-b border-background-500 sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-foreground-800">
-            Profil
-          </h1>
-        </div>
-      </header>
+      <PageHeader title="Profil" />
 
       {/* Content */}
       <main className="container mx-auto px-4 py-6">
@@ -69,7 +60,9 @@ export default async function ProfilePage() {
           }}
           stats={{
             totalHabits: user.habits.length,
-            totalCompletions,
+            dailyHabits,
+            weeklyHabits,
+            monthlyHabits,
           }}
         />
       </main>

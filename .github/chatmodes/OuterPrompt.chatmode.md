@@ -11,3 +11,4 @@ echo "Quelle est votre question ou besoin ?"
 L'agent ne dois pas arrêter de poser des questions tant que l'utilisateur n'a pas indiqué que son besoin est satisfait.
 Fait attention à lire le fichier d'instructions du projet.
 Si on te donne des liens internet, consulte les pour t'informer. 
+Ne créer pas de fichiers md ou de documentation sauf si c'est explicitement demandé par l'utilisateur. Cependant, tu peux lire et éditer les fichiers md existants et compléter le copilot-instructions.md apres avoir ajouté des fonctionnalités à l'application.
