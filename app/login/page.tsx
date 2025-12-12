@@ -163,12 +163,6 @@ function LoginForm() {
                   >
                     Mot de passe
                   </label>
-                  <Link
-                    href="/forgot-password"
-                    className="text-sm text-[var(--accent-purple)] hover:underline"
-                  >
-                    Mot de passe oublié ?
-                  </Link>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground-300" />
